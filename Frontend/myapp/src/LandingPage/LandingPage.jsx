@@ -8,7 +8,7 @@ function LandingPage() {
 
   // Backend API URL
   const API_URL = "http://localhost:5000/restaurants";
-  const backendUrl = "http://localhost:5000"; // Base URL for images
+  const backendUrl = "http://localhost:5000"; // Base URL for images - node restaurantadmin
 
   useEffect(() => {
     const fetchRestaurants = async () => {
