@@ -9,5 +9,12 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "json-server": "^1.0.0-beta.3",
+    "mongoose": "^8.10.1"
+  },
+  "type": "commonjs"
 }
