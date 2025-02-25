@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-
+import { Link } from "react-router-dom";
 function LandingPage() {
   const [searchCity, setSearchCity] = useState("");
   const [restaurants, setRestaurants] = useState([]);
@@ -42,7 +42,7 @@ function LandingPage() {
         <h1 className="text-2xl font-bold text-green-600">Foods</h1>
         <div>
           <button className="px-4 py-2 mr-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
-            Login
+            <Link to = "/login">Login </Link>
           </button>
           <button className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">
             Sign Up
