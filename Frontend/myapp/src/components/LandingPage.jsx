@@ -9,7 +9,7 @@ const LandingPage = () => {
         <h1 className="text-2xl font-bold text-green-600">Foodie</h1>
         <div>
           <Link to="/restaurant-signup" className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 mr-2">
-            Restaurant
+            Add Restaurant
           </Link>
           <Link to="/admin-login" className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 mr-2">
             Admin
