@@ -18,7 +18,7 @@ const RestaurantSignup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:5000/api/restaurants", restaurant);
+      await axios.post("http://localhost:3000/api/restaurants", restaurant);
       alert("Restaurant registered successfully!");
       setRestaurant({
         name: "",
