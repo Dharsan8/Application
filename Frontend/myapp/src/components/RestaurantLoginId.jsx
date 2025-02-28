@@ -22,27 +22,30 @@ export default function RestaurantLogin() {
     }
 
     try {
-        const response = await fetch("http://localhost:3000/api/restaurants/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, password }),
-        });
-
-        const data = await response.json();
-
-        if (data.success) {
-            alert(`Login successful! Welcome, ${data.restaurantName}`);
-            localStorage.setItem("restaurantID", data.restaurantID);
-            navigate("/dashboard");
-        } else {
-            alert(data.error || "Invalid email or password.");
-        }
-    } catch (error) {
-        console.error("Login error:", error);
-        alert("Login failed. Please check the server and API endpoint.");
-    }
-};
-
+      const response = await fetch("http://localhost:3000/api/restuarants/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+      });
+  
+      if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+  
+      if (data.success) {
+          alert(`Login successful! Welcome, ${data.restaurantName}`);
+          localStorage.setItem("restaurantID", data.restaurantID);
+          navigate("/dashboard");
+      } else {
+          alert(data.error || "Invalid email or password.");
+      }
+  } catch (error) {
+      console.error("Login error:", error);
+      alert("Login failed. Please check the server and API endpoint.");
+  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FAD961] to-[#F76B1C] text-gray-900 flex flex-col items-center p-6">
@@ -67,7 +70,7 @@ export default function RestaurantLogin() {
           className="w-full p-3 my-2 rounded border border-gray-300"
           name="email"
           type="email"
-          placeholder="Email"
+          placeholder="Restaurant ID"
           value={formData.email}
           onChange={handleChange}
           required
