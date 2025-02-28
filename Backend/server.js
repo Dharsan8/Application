@@ -25,6 +25,10 @@ app.get('/api/protected', authMiddleware, (req, res) => {
 
 app.use('/api/restaurants', restaurantRoutes);
 
+
+  
+  
+
 // Port
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server is running at port ${PORT}`));
