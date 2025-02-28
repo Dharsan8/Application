@@ -14,23 +14,36 @@ export default function RestaurantLogin() {
   };
 
   const handleLogin = async () => {
+    const { email, password } = formData; // ✅ Extract values from formData
+
+    if (!email || !password) {
+      alert("Please enter both email and password.");
+      return;
+    }
+
     try {
       const response = await fetch("http://localhost:3000/api/restaurants/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ email, password }), // ✅ Use extracted email & password
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
       const data = await response.json();
 
       if (data.success) {
-        alert("Login successful!");
-        localStorage.setItem("restaurantId", data.restaurantId); // Storing Restaurant ID
-        navigate("/dashboard"); // Navigate to Dashboard
+        alert(`Login successful! Welcome, ${data.restaurantName}`);
+        localStorage.setItem("restaurantId", data.restaurantId);
+        navigate("/dashboard");
       } else {
         alert("Invalid email or password. Please try again.");
       }
     } catch (error) {
-      console.error("Login error", error);
+      console.error("Login error:", error);
+      alert("Login failed. Please check the server and API endpoint.");
     }
   };
 
@@ -53,9 +66,28 @@ export default function RestaurantLogin() {
 
       <div className="bg-white text-gray-900 p-6 mt-10 rounded-xl shadow-2xl w-full max-w-lg transition-all duration-500 border border-gray-300 flex flex-col">
         <h3 className="text-2xl font-semibold mb-4 text-[#F76B1C]">Login Details</h3>
-        <input className="w-full p-3 my-2 rounded border border-gray-300" name="email" type="email" placeholder="Email" onChange={handleChange} />
-        <input className="w-full p-3 my-2 rounded border border-gray-300" name="password" type="password" placeholder="Password" onChange={handleChange} />
-        <button onClick={handleLogin} className="w-full bg-[#8A4F7D] hover:bg-[#6A3B5B] text-white p-3 rounded-lg font-bold transition-all mt-4">
+        <input
+          className="w-full p-3 my-2 rounded border border-gray-300"
+          name="email"
+          type="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+        />
+        <input
+          className="w-full p-3 my-2 rounded border border-gray-300"
+          name="password"
+          type="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
+          required
+        />
+        <button
+          onClick={handleLogin}
+          className="w-full bg-[#8A4F7D] hover:bg-[#6A3B5B] text-white p-3 rounded-lg font-bold transition-all mt-4"
+        >
           Login
         </button>
 
