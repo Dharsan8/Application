@@ -15,5 +15,16 @@ router.post('/register', async (req, res) => {
     }
 });
 
+// Fetch all registered restaurants
+router.get('/all', async (req, res) => {
+    try {
+        const restaurants = await RestaurantRegister.find(); // Fetch all restaurant data
+        res.json(restaurants);
+    } catch (error) {
+        console.error("Error fetching restaurants:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 
 module.exports = router;
