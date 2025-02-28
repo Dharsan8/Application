@@ -4,6 +4,7 @@ const cors = require("cors");
 const connectDb = require("./config/db");
 const authRoutes = require("./routes/auth");
 const authMiddleware = require("./middleware/auth");
+const restaurantRoutes = require("./routes/restaurantreg");
 
 const app = express();
 app.use(express.json());
@@ -22,8 +23,7 @@ app.get('/api/protected', authMiddleware, (req, res) => {
     res.json({ message: "Protected route", user: req.user });
 });
 
-
-
+app.use('/api/restaurants', restaurantRoutes);
 
 // Port
 const PORT = process.env.PORT || 3000;
