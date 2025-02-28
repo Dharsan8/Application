@@ -26,6 +26,8 @@ app.get('/api/protected', authMiddleware, (req, res) => {
 app.use('/api/restaurants', restaurantRoutes);
 
 
+
+
   
   
 

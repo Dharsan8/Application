@@ -122,19 +122,21 @@ router.post("/login", async (req, res) => {
         const restaurant = await RestaurantCredential.findOne({ email });
 
         if (!restaurant) {
-            return res.status(404).json({ error: "Restaurant not found" });
+            return res.status(404).json({ success: false, error: "Restaurant not found" });
         }
 
         if (restaurant.password !== password) {
-            return res.status(401).json({ error: "Invalid password" });
+            return res.status(401).json({ success: false, error: "Invalid password" });
         }
 
-        res.json({ message: "Login successful", restaurantID: restaurant.restaurantID });
+        res.json({ success: true, restaurantID: restaurant.restaurantID, restaurantName: restaurant.restaurantName });
     } catch (error) {
         console.error("Error during login:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ success: false, error: "Internal Server Error" });
     }
 });
+
+
 
 
 module.exports = router;
