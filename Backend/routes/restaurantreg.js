@@ -116,10 +116,10 @@ router.delete("/delete/:id/:email", async (req, res) => {
 
 // ✅ Login Route (Add this below your existing routes)
 router.post("/login", async (req, res) => {
-    const { email, password } = req.body;
+    const { restaurantID, password } = req.body;  // Get restaurantID instead of email
 
     try {
-        const restaurant = await RestaurantCredential.findOne({ email });
+        const restaurant = await RestaurantCredential.findOne({ restaurantID });
 
         if (!restaurant) {
             return res.status(404).json({ success: false, error: "Restaurant not found" });
@@ -129,7 +129,11 @@ router.post("/login", async (req, res) => {
             return res.status(401).json({ success: false, error: "Invalid password" });
         }
 
-        res.json({ success: true, restaurantID: restaurant.restaurantID, restaurantName: restaurant.restaurantName });
+        res.json({
+            success: true,
+            restaurantID: restaurant.restaurantID,
+            restaurantName: restaurant.restaurantName,
+        });
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).json({ success: false, error: "Internal Server Error" });

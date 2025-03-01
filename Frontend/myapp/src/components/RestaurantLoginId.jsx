@@ -5,7 +5,7 @@ import heroImage from "../assets/images/heroback.jpg";
 export default function RestaurantLogin() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    email: "",
+    restaurantID: "", // 🔹 Changed from email to restaurantID
     password: "",
   });
 
@@ -14,37 +14,34 @@ export default function RestaurantLogin() {
   };
 
   const handleLogin = async () => {
-    const { email, password } = formData;
+    const { restaurantID, password } = formData; // 🔹 Updated variable
 
-    if (!email || !password) {
-        alert("Please enter both email and password.");
-        return;
+    if (!restaurantID || !password) {
+      alert("Please enter both Restaurant ID and password.");
+      return;
     }
 
     try {
-      const response = await fetch("http://localhost:3000/api/restuarants/login", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email, password }),
+      const response = await fetch("http://localhost:3000/api/restaurants/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ restaurantID, password }), // 🔹 Sending correct field
       });
-  
+
       if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+        throw new Error(`Login failed! Status: ${response.status}`);
       }
-  
+
       const data = await response.json();
-  
-      if (data.success) {
-          alert(`Login successful! Welcome, ${data.restaurantName}`);
-          localStorage.setItem("restaurantID", data.restaurantID);
-          navigate("/dashboard");
-      } else {
-          alert(data.error || "Invalid email or password.");
-      }
-  } catch (error) {
+      alert("Login Successful! Redirecting...");
+      navigate("/restaurant-dashboard"); // 🔹 Navigate to restaurant dashboard after login
+
+    } catch (error) {
       console.error("Login error:", error);
-      alert("Login failed. Please check the server and API endpoint.");
-  }
+      alert("Invalid Restaurant ID or Password. Please try again.");
+    }
   };
 
   return (
@@ -68,10 +65,10 @@ export default function RestaurantLogin() {
         <h3 className="text-2xl font-semibold mb-4 text-[#F76B1C]">Login Details</h3>
         <input
           className="w-full p-3 my-2 rounded border border-gray-300"
-          name="email"
-          type="email"
+          name="restaurantID" // 🔹 Changed name from email to restaurantID
+          type="text"
           placeholder="Restaurant ID"
-          value={formData.email}
+          value={formData.restaurantID}
           onChange={handleChange}
           required
         />

@@ -6,6 +6,7 @@ import AdminLogin from "./components/AdminLogin";
 import AdminDashboard from "./components/AdminDashboard"; // ✅ Import Admin Dashboard
 import RestaurantRegister from "./components/RestaurantRegister";
 import RestaurantLogin from "./components/RestaurantLoginId";
+import RestaurantDashboard from "./components/RestaurantDashboard";
 function App() {
   return (
     <Router>
@@ -14,6 +15,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/restaurantreg" element={<RestaurantRegister/>}/>
         <Route path="/restaurant-login" element={<RestaurantLogin/>}/>
+        <Route path="/restaurant-dashboard" element={<RestaurantDashboard/>}/>
 
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} /> {/* ✅ New Route */}
