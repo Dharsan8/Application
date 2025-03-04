@@ -29,6 +29,7 @@ export default function RestaurantRegister() {
       });
       const data = await response.json();
       alert(data.message);
+      alert(" Please wait for admin approval.");
       navigate('/restaurant-login'); // Redirect to login page after successful registration
     } catch (error) {
       console.error("Error submitting form", error);
