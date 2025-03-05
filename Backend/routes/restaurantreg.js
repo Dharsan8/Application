@@ -115,30 +115,41 @@ router.delete("/delete/:id/:email", async (req, res) => {
 });
 
 // ✅ Login Route (Add this below your existing routes)
+
 router.post("/login", async (req, res) => {
-    const { restaurantID, password } = req.body;  // Get restaurantID instead of email
+  const { restaurantID, password } = req.body;
 
-    try {
-        const restaurant = await RestaurantCredential.findOne({ restaurantID });
+  try {
+    const restaurant = await RestaurantCredential.findOne({ restaurantID, password });
 
-        if (!restaurant) {
-            return res.status(404).json({ success: false, error: "Restaurant not found" });
-        }
-
-        if (restaurant.password !== password) {
-            return res.status(401).json({ success: false, error: "Invalid password" });
-        }
-
-        res.json({
-            success: true,
-            restaurantID: restaurant.restaurantID,
-            restaurantName: restaurant.restaurantName,
-        });
-    } catch (error) {
-        console.error("Error during login:", error);
-        res.status(500).json({ success: false, error: "Internal Server Error" });
+    if (!restaurant) {
+      return res.status(401).json({ message: "Invalid Restaurant ID or Password" });
     }
+
+    res.json({
+      message: "Login Successful",
+      restaurant, // Send all restaurant details
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error });
+  }
 });
+
+router.get("/details", async (req, res) => {
+    try {
+      const restaurantID = req.headers["restaurant-id"]; // Ensure the frontend sends this
+      if (!restaurantID) return res.status(400).json({ error: "Missing Restaurant ID" });
+  
+      const restaurant = await RestaurantCredential.findOne({ restaurantID });
+      if (!restaurant) return res.status(404).json({ error: "Restaurant not found" });
+  
+      res.json(restaurant);  // ✅ Send full restaurant details
+    } catch (error) {
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+  });
+  
+
 
 
 
