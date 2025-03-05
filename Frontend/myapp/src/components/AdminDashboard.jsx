@@ -51,72 +51,69 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="flex flex-col items-center min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6">Admin Dashboard</h1>
+    <div className="flex flex-col items-center min-h-screen bg-[#F5E1DA] p-6">
+    <h1 className="text-3xl font-bold text-[#7F5539] mb-6">Admin Dashboard</h1>
 
-      <button
-        onClick={() => setOpen(true)}
-        className="px-6 py-3 bg-[#AD56C4] text-white font-bold rounded-xl hover:bg-[#FF8DA1] transition"
-      >
-        View Restaurants
-      </button>
+    {/* View Restaurants Button */}
+    <button
+      onClick={() => setOpen(!open)}
+      className="px-6 py-3 bg-[#B08968] text-white font-bold rounded-xl hover:bg-[#9C6644] transition"
+    >
+      {open ? "Hide Restaurants" : "View Restaurants"}
+    </button>
 
-      {/* Popup Modal */}
-      <Dialog.Root open={open} onOpenChange={setOpen}>
-        <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black opacity-50" />
-          <Dialog.Content className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-xl shadow-xl w-[90%] max-w-lg">
-            <Dialog.Title className="text-2xl font-bold text-gray-800">Registered Restaurants</Dialog.Title>
+    {/* Approval List (Visible only when open) */}
+    {open && (
+      <div className="w-full max-w-5xl mt-6 p-6 bg-[#E1C699] rounded-xl shadow-lg transition-opacity duration-300 animate-fadeIn">
+        <h2 className="text-2xl font-bold text-[#7F5539] mb-4">Registered Restaurants</h2>
 
-            <div className="mt-4 max-h-[400px] overflow-auto">
-              {restaurants.length === 0 ? (
-                <p className="text-gray-500">No registered restaurants found.</p>
-              ) : (
-                restaurants.map((restaurant) => (
-                  <div key={restaurant._id} className="p-3 border-b">
-                    <h2 className="text-lg font-semibold">{restaurant.restaurantName}</h2>
-                    <p className="text-sm text-gray-600">Location: {restaurant.location}</p>
-                    <p className="text-sm text-gray-600">Owner: {restaurant.ownerName}</p>
-                    <p className="text-sm text-gray-600">Contact: {restaurant.phoneNumber}</p>
-                    <p className="text-sm text-gray-600">Address: {restaurant.address}</p>
-                    <p className="text-sm text-gray-600">Email: {restaurant.email}</p>
-                    <p className="text-sm text-gray-600">Status: Not Approved</p>
+        <div className="bg-white shadow-md rounded-lg overflow-hidden">
+          {restaurants.length === 0 ? (
+            <p className="text-gray-500 p-4">No registered restaurants found.</p>
+          ) : (
+            restaurants.map((restaurant) => (
+              <div
+                key={restaurant._id}
+                className="flex items-center justify-between border-b p-4 bg-[#F5E1DA]"
+              >
+                <div>
+                  <h2 className="text-lg font-semibold text-[#7F5539]">
+                    {restaurant.restaurantName}
+                  </h2>
+                  <p className="text-sm text-[#9C6644]">Location: {restaurant.location}</p>
+                  <p className="text-sm text-[#9C6644]">Owner: {restaurant.ownerName}</p>
+                  <p className="text-sm text-[#9C6644]">Contact: {restaurant.phoneNumber}</p>
+                  <p className="text-sm text-[#9C6644]">Email: {restaurant.email}</p>
+                  <p className="text-sm font-semibold text-[#B08968]">Status: Not Approved</p>
+                </div>
 
-                    <div className="flex gap-2 mt-3">
-                      <button
-                        onClick={() => handleApproval(restaurant, "Approved")}
-                        className="px-4 py-2 bg-green-500 text-white rounded-lg"
-                      >
-                        Approve
-                      </button>
-                      <button
-                        onClick={() => handleApproval(restaurant, "Not Approved")}
-                        className="px-4 py-2 bg-yellow-500 text-white rounded-lg"
-                      >
-                        Not Approved
-                      </button>
-                      <button
-                        onClick={() => handleDelete(restaurant._id, restaurant.email)}
-                        className="px-4 py-2 bg-red-500 text-white rounded-lg"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <button
-              onClick={() => setOpen(false)}
-              className="mt-4 px-4 py-2 bg-gray-500 text-white rounded-xl w-full"
-            >
-              Close
-            </button>
-          </Dialog.Content>
-        </Dialog.Portal>
-      </Dialog.Root>
-    </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleApproval(restaurant, "Approved")}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition"
+                  >
+                    Approve
+                  </button>
+                  <button
+                    onClick={() => handleApproval(restaurant, "Not Approved")}
+                    className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition"
+                  >
+                    Not Approved
+                  </button>
+                  <button
+                    onClick={() => handleDelete(restaurant._id, restaurant.email)}
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    )}
+  </div>
   );
 };
 
