@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import heroImage from "../assets/images/heroback.jpg";
+//import heroImage from "../assets/images/heroback.jpg";
+import heroImage from "/src/assets/images/heroback.jpg";
 
 export default function RestaurantLogin() {
   const navigate = useNavigate();

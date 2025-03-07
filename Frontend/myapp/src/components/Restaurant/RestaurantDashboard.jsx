@@ -8,23 +8,21 @@ export default function RestaurantDashboard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Retrieve restaurant details from localStorage
     const storedRestaurant = localStorage.getItem("restaurantData");
-
     try {
       if (storedRestaurant) {
         setRestaurant(JSON.parse(storedRestaurant));
       } else {
-        navigate("/restaurant-login"); // Redirect if not logged in
+        navigate("/restaurant-login");
       }
     } catch (error) {
       console.error("Error parsing restaurant data:", error);
-      navigate("/restaurant-login"); // Handle corrupted data
+      navigate("/restaurant-login");
     }
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem("restaurantData"); // Clear session
+    localStorage.removeItem("restaurantData");
     navigate("/restaurant-login");
   };
 
@@ -37,7 +35,6 @@ export default function RestaurantDashboard() {
         {restaurant && (
           <div className="relative">
             <FaUserCircle className="text-white text-3xl cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
-
             {isOpen && (
               <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg p-4">
                 <h2 className="text-lg font-bold text-[#8A4F7D]">{restaurant.restaurantName}</h2>
@@ -46,7 +43,10 @@ export default function RestaurantDashboard() {
                 <p className="text-gray-700"><b>Email:</b> {restaurant.email}</p>
                 <p className="text-gray-700"><b>Phone:</b> {restaurant.phoneNumber}</p>
 
-                <button onClick={handleLogout} className="mt-4 w-full bg-red-500 text-white py-2 rounded-lg">
+                <button 
+                  onClick={handleLogout} 
+                  className="mt-4 w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition-all"
+                >
                   Logout
                 </button>
               </div>
@@ -57,8 +57,36 @@ export default function RestaurantDashboard() {
 
       {/* Main Content */}
       <div className="p-6">
-        <h2 className="text-3xl font-bold text-gray-800">Welcome, {restaurant?.restaurantName}!</h2>
-        <p className="text-gray-600 mt-2">Manage your restaurant and orders from here.</p>
+        <h2 className="text-3xl font-bold text-gray-800">
+          Welcome, {restaurant?.restaurantName}!
+        </h2>
+        <p className="text-gray-600 mt-2">
+          Manage your restaurant.
+        </p>
+
+        {/* Action Buttons */}
+        <div className="mt-6 flex flex-wrap gap-4">
+          <button 
+            className="bg-green-500 hover:bg-green-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all"
+            onClick={() => navigate("/add-item")}
+          >
+            ➕ Add Item
+          </button>
+
+          <button 
+            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all"
+            onClick={() => navigate("/edit-item")}
+          >
+            ✏️ Edit Item
+          </button>
+
+          <button 
+            className="bg-red-500 hover:bg-red-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md transition-all"
+            onClick={() => navigate("/delete-item")}
+          >
+            🗑️ Delete Item
+          </button>
+        </div>
       </div>
     </div>
   );

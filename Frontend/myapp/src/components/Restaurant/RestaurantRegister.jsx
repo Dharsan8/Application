@@ -1,6 +1,8 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import heroImage from '../assets/images/heroback.jpg';
+//import heroImage from '../assets/images/heroback.jpg';
+import heroImage from "/src/assets/images/heroback.jpg";
+
 
 export default function RestaurantRegister() {
   const navigate = useNavigate();
@@ -91,6 +93,8 @@ export default function RestaurantRegister() {
         <button onClick={() => navigate('/restaurant-login')} className="text-[#8A4F7D] font-bold ml-1 hover:underline">Click here to Login</button>
       </p>
     </div>
+
+    
   );
 }
 

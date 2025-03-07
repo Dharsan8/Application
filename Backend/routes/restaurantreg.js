@@ -148,6 +148,17 @@ router.get("/details", async (req, res) => {
       res.status(500).json({ error: "Internal Server Error" });
     }
   });
+
+  // Add New Food Item
+router.post("/food/add", async (req, res) => {
+    try {
+      const newItem = new FoodItem(req.body);
+      await newItem.save();
+      res.status(201).json({ message: "Food item added successfully", item: newItem });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to add food item", details: error.message });
+    }
+  });
   
 
 
