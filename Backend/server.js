@@ -5,17 +5,23 @@ const connectDb = require("./config/db");
 const authRoutes = require("./routes/auth");
 const authMiddleware = require("./middleware/auth");
 const restaurantRoutes = require("./routes/restaurantreg");
+const foodRoutes = require("./routes/food"); // ✅ Import food routes
+const path = require("path");
 
 const app = express();
 app.use(express.json());
 app.use(cors({ 
-    origin: '*', // Allow all origins
+    origin: '*', 
     methods: ["GET", "POST", "PUT", "DELETE"], 
     allowedHeaders: ["Content-Type", "Authorization"]
 }));
 
+app.use("/image", express.static(path.join(__dirname, "Public/image")));
+
+
 // Connect MongoDB
 connectDb();
+
 
 // Routes
 app.use("/api", authRoutes);
@@ -24,12 +30,10 @@ app.get('/api/protected', authMiddleware, (req, res) => {
 });
 
 app.use('/api/restaurants', restaurantRoutes);
+app.use('/api/food', foodRoutes); // ✅ Use food routes separately
 
 
 
-
-  
-  
 
 // Port
 const PORT = process.env.PORT || 3000;

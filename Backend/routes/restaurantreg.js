@@ -6,6 +6,7 @@ const nodemailer = require("nodemailer"); // Add this at the top
 
 
 
+
 // Generate random Restaurant ID
 const generateRandomID = () => `RES${Math.floor(100000 + Math.random() * 900000)}`;
 
@@ -149,17 +150,7 @@ router.get("/details", async (req, res) => {
     }
   });
 
-  // Add New Food Item
-router.post("/food/add", async (req, res) => {
-    try {
-      const newItem = new FoodItem(req.body);
-      await newItem.save();
-      res.status(201).json({ message: "Food item added successfully", item: newItem });
-    } catch (error) {
-      res.status(500).json({ error: "Failed to add food item", details: error.message });
-    }
-  });
-  
+
 
 
 
