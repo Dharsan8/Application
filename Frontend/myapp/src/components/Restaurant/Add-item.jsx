@@ -61,7 +61,7 @@ export default function AddItem() {
           location: "",
         });
         setImage(null);
-        navigate("/dashboard"); // Redirect after adding item
+        navigate("restaurant-dashboard"); // Redirect after adding item
       }
     } catch (error) {
       console.error("Error adding item:", error);
