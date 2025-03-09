@@ -114,7 +114,7 @@ export default function RestaurantDashboard() {
                   <div className="flex justify-between mt-4">
                     <button
                       className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-md"
-                      onClick={() => navigate(`/add-item/${item._id}`)}
+                      onClick={() => navigate(`/edit-item/${item._id}`)}
                     >
                       <FaEdit className="inline-block mr-2" /> Edit
                     </button>

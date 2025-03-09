@@ -8,6 +8,7 @@ import RestaurantRegister from "./components/Restaurant//RestaurantRegister";
 import RestaurantLogin from "./components/Restaurant//RestaurantLoginId";
 import RestaurantDashboard from "./components/Restaurant//RestaurantDashboard";
 import AddItem from "./components/Restaurant/Add-item";
+import EditItem from "./components/Restaurant/Edit-item";
 function App() {
   return (
     <Router>
@@ -18,6 +19,9 @@ function App() {
         <Route path="/restaurant-login" element={<RestaurantLogin/>}/>
         <Route path="/restaurant-dashboard" element={<RestaurantDashboard/>}/>
         <Route path="/add-item" element={<AddItem/>}/>
+        {/* <Route path="/add-item/:restaurantId" element={<EditItem />} /> */}
+        <Route path="/edit-item/:itemId" element={<EditItem />} />
+
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} /> {/* ✅ New Route */}
       </Routes>
