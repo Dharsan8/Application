@@ -58,4 +58,22 @@ router.post("/add", upload.single("image"), async (req, res) => {
   }
 });
 
+router.get("/:restaurantId", async (req, res) => {
+  try {
+    const foodItems = await FoodItem.find({ restaurantId: req.params.restaurantId });
+    res.json(foodItems);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch food items" });
+  }
+});
+router.delete("/delete/:foodId", async (req, res) => {
+  try {
+    await FoodItem.findByIdAndDelete(req.params.foodId);
+    res.json({ message: "Food item deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ error: "Failed to delete food item" });
+  }
+});
+
+
 module.exports = router;
