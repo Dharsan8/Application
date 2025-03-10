@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaUserCircle, FaPlus, FaEdit, FaTrash, FaBars } from "react-icons/fa";
+import { FaUserCircle, FaPlus, FaEdit, FaTrash, FaBars,FaCommentDots,FaCheck, FaTimes} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
@@ -9,6 +9,7 @@ export default function RestaurantDashboard() {
   const [isOpen, setIsOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
+
 
   useEffect(() => {
     const storedRestaurant = localStorage.getItem("restaurantData");
@@ -52,86 +53,170 @@ export default function RestaurantDashboard() {
     navigate("/restaurant-login");
   };
 
+  const handleUpdate = async (foodId, updatedData) => {
+    try {
+      const response = await axios.put(`http://localhost:3000/api/food/update/${foodId}`, updatedData);
+      setFoodItems((prevItems) =>
+        prevItems.map((item) => (item._id === foodId ? { ...item, ...updatedData } : item))
+      );
+    } catch (error) {
+      console.error("Error updating food item:", error);
+    }
+  };
+
+
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
-      <div className={`bg-[#8A4F7D] text-white p-5 space-y-6 transition-all ${sidebarOpen ? "w-64" : "w-16"}`}>
-        <div className="flex justify-between items-center">
-          <h1 className={`text-xl font-bold ${!sidebarOpen && "hidden"}`}>Dashboard</h1>
-          <FaBars className="text-white text-2xl cursor-pointer" onClick={() => setSidebarOpen(!sidebarOpen)} />
-        </div>
+      <div className={`bg-[#8A4F7D] text-white h-screen p-5 transition-all flex flex-col ${sidebarOpen ? "w-56" : "w-16"}`}>
+  <div className="flex items-center justify-between mb-6">
+    <h2 className={`text-xl font-bold transition-all ${sidebarOpen ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}>
+      {restaurant?.restaurantName || "Restaurant"}
+    </h2>
+    <FaBars className="text-white text-2xl cursor-pointer" onClick={() => setSidebarOpen(!sidebarOpen)} />
+  </div>
 
-        <nav className="mt-10">
-          <button
-            className="flex items-center space-x-3 w-full py-3 px-4 rounded-md hover:bg-[#6B3A63] transition"
-            onClick={() => navigate("/add-item")}
-          >
-            <FaPlus />
-            {sidebarOpen && <span>Create New Item</span>}
-          </button>
-        </nav>
-      </div>
+  {sidebarOpen && (
+    <nav className="flex flex-col flex-grow justify-center items-center space-y-4">
+      {[{ icon: FaPlus, text: "Create", link: "/add-item" },
+        { icon: FaEdit, text: "Edit", link: "/edit-item" },
+        { icon: FaCommentDots, text: "Feedback", link: "/feedback" }].map(({ icon: Icon, text, link }, index) => (
+        <button
+          key={index}
+          className="flex items-center space-x-3 w-full py-3 px-4 rounded-md hover:bg-[#6B3A63] transition"
+          onClick={() => navigate(link)}
+        >
+          <Icon className="text-xl" />
+          <span>{text}</span>
+        </button>
+      ))}
+    </nav>
+  )}
+</div>
 
       {/* Main Content */}
       <div className="flex-1 bg-gray-100">
         {/* Navbar */}
-        <nav className="bg-[#8A4F7D] p-4 flex justify-between items-center shadow-md">
-          <h1 className="text-white text-2xl font-bold">Restaurant Dashboard</h1>
-          {restaurant && (
-            <div className="relative">
-              <FaUserCircle className="text-white text-3xl cursor-pointer" onClick={() => setIsOpen(!isOpen)} />
-              {isOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg p-4">
-                  <h2 className="text-lg font-bold text-[#8A4F7D]">{restaurant.restaurantName}</h2>
-                  <p className="text-gray-700"><b>Owner:</b> {restaurant.ownerName}</p>
-                  <p className="text-gray-700"><b>Location:</b> {restaurant.location}</p>
-                  <p className="text-gray-700"><b>Email:</b> {restaurant.email}</p>
-                  <p className="text-gray-700"><b>Phone:</b> {restaurant.phoneNumber}</p>
-                  <button onClick={handleLogout} className="mt-4 w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg transition-all">
-                    Logout
-                  </button>
+        <nav className="bg-[#8A4F7D] p-4 flex justify-between items-center shadow-lg relative">
+        <h1 className="text-white text-2xl font-extrabold tracking-wide uppercase">Restaurant Dashboard</h1>
+        {restaurant && (
+          <div className="relative">
+            <FaUserCircle
+              className="text-white text-4xl cursor-pointer hover:scale-110 transition-transform duration-200"
+              onClick={() => setIsOpen(!isOpen)}
+            />
+            {isOpen && (
+              <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-2xl p-5 border border-gray-200">
+                <h2 className="text-xl font-semibold text-[#8A4F7D] text-center border-b pb-2">{restaurant.restaurantName}</h2>
+                <div className="mt-3 space-y-2 text-gray-800">
+                  <p className="flex justify-between"><span className="font-semibold">Owner:</span> {restaurant.ownerName}</p>
+                  <p className="flex justify-between"><span className="font-semibold">Location:</span> {restaurant.location}</p>
+                  <p className="flex justify-between"><span className="font-semibold">Email:</span> {restaurant.email}</p>
+                  <p className="flex justify-between"><span className="font-semibold">Phone:</span> {restaurant.phoneNumber}</p>
                 </div>
-              )}
-            </div>
-          )}
-        </nav>
+                <button
+                  onClick={handleLogout}
+                  className="mt-4 w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 rounded-lg transition-all font-semibold shadow-md hover:shadow-lg"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </nav>
 
         {/* Food Items Section */}
         <div className="p-6">
-          <h2 className="text-3xl font-bold text-gray-800">Your Food Items</h2>
-          {foodItems.length === 0 ? (
-            <p className="text-gray-600 mt-2">No food items added yet.</p>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mt-6">
-              {foodItems.map((item) => (
-                <div key={item._id} className="bg-white shadow-lg rounded-lg p-4">
-                  <img src={`http://localhost:3000${item.image}`} alt={item.name} className="w-full h-40 object-cover rounded-md" />
-                  <h3 className="text-xl font-bold mt-2">{item.name}</h3>
-                  <p className="text-gray-600">{item.category}</p>
-                  <p className="text-gray-700 font-bold mt-1">₹{item.price}</p>
-                  <p className="text-gray-700 font-bold mt-1">{item.availability}</p>
-
-                  {/* Buttons */}
-                  <div className="flex justify-between mt-4">
-                    <button
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-2 rounded-md"
-                      onClick={() => navigate(`/edit-item/${item._id}`)}
-                    >
-                      <FaEdit className="inline-block mr-2" /> Edit
-                    </button>
-                    <button
-                      className="bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-md"
-                      onClick={() => handleDelete(item._id)}
-                    >
-                      <FaTrash className="inline-block mr-2" /> Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+      <h2 className="text-3xl font-bold text-gray-800">Your Food Items</h2>
+      {foodItems.length === 0 ? (
+        <p className="text-gray-600 mt-2">No food items added yet.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
+{foodItems.map((item) => (
+  <FoodCard key={item._id} item={item} onDelete={handleDelete} onUpdate={handleUpdate} />
+))}
         </div>
+      )}
+    </div>
+
       </div>
     </div>
   );
 }
+const FoodCard = ({ item, onDelete, onUpdate }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedPrice, setEditedPrice] = useState(item.price);
+  const [editedAvailability, setEditedAvailability] = useState(item.availability);
+
+
+  const saveChanges = () => {
+    const updatedData = {
+      price: editedPrice,
+      availability: editedAvailability,
+    };
+    onUpdate(item._id, updatedData);
+    setIsEditing(false);
+  };
+
+  return (
+    <div className="bg-white shadow-md rounded-xl p-3 border border-gray-200 w-64">
+      <img
+        src={`http://localhost:3000${item.image}`}
+        alt={item.name}
+        className="w-full h-28 object-cover rounded-lg"
+      />
+      <h3 className="text-lg font-semibold mt-2 text-gray-800 truncate">{item.name}</h3>
+      <p className="text-sm text-gray-500">{item.category}</p>
+
+      <div className="mt-2">
+        {isEditing ? (
+          <div className="flex flex-col space-y-2">
+            <input
+              type="number"
+              value={editedPrice}
+              onChange={(e) => setEditedPrice(e.target.value)}
+              className="w-full border border-gray-300 p-1 rounded text-sm"
+            />
+            <select
+              value={editedAvailability}
+              onChange={(e) => setEditedAvailability(e.target.value)}
+              className="w-full border border-gray-300 p-1 rounded text-sm"
+            >
+              <option value="Available">Available</option>
+              <option value="Out of Stock">Out of Stock</option>
+            </select>
+          </div>
+        ) : (
+          <div className="flex justify-between items-center text-sm">
+            <p className="font-semibold text-gray-700">₹{item.price}</p>
+            <p className={`font-semibold ${item.availability === "Available" ? "text-green-600" : "text-red-600"}`}>
+              {item.availability}
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="flex justify-between mt-3 space-x-1">
+        <button
+          className={`${isEditing ? "bg-green-500" : "bg-blue-500"} text-white text-xs px-2 py-1 rounded-md flex items-center`}
+          onClick={() => (isEditing ? saveChanges() : setIsEditing(true))}
+        >
+          {isEditing ? <FaCheck className="mr-1" /> : <FaEdit className="mr-1" />}
+          {isEditing ? "Save" : "Edit"}
+        </button>
+        {isEditing && (
+          <button className="bg-gray-500 text-white text-xs px-2 py-1 rounded-md flex items-center" onClick={() => setIsEditing(false)}>
+            <FaTimes />
+          </button>
+        )}
+        <button
+          className="bg-red-500 text-white text-xs px-2 py-1 rounded-md flex items-center"
+          onClick={() => onDelete(item._id)}
+        >
+          <FaTrash className="mr-1" /> Delete
+        </button>
+      </div>
+    </div>
+  );
+};
