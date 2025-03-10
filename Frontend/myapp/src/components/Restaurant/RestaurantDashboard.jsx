@@ -109,6 +109,7 @@ export default function RestaurantDashboard() {
                   <h3 className="text-xl font-bold mt-2">{item.name}</h3>
                   <p className="text-gray-600">{item.category}</p>
                   <p className="text-gray-700 font-bold mt-1">₹{item.price}</p>
+                  <p className="text-gray-700 font-bold mt-1">{item.availability}</p>
 
                   {/* Buttons */}
                   <div className="flex justify-between mt-4">
