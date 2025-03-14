@@ -47,6 +47,7 @@ router.post("/add", upload.single("image"), async (req, res) => {
       prepTime,
       restaurantId, // ✅ Keep as String
       image: `/image/${req.file.filename}`,
+      discount : 0
     });
 
     await newFood.save();
@@ -75,35 +76,33 @@ router.delete("/delete/:foodId", async (req, res) => {
   }
 });
 // update
-router.put("/update/:id", upload.single("image"), async (req, res) => {
+router.put("/update/:id", async (req, res) => {
   try {
-    console.log("Incoming update request:", req.body);
-    console.log("Uploaded file details:", req.file);
+    const { price, discount, availability } = req.body;
 
-    const existingFood = await FoodItem.findById(req.params.id);
-    if (!existingFood) return res.status(404).json({ error: "Food item not found" });
+    // Fetch existing item
+    const foodItem = await FoodItem.findById(req.params.id);
+    if (!foodItem) return res.status(404).json({ error: "Food item not found" });
 
-    let updateData = { ...req.body };
-    updateData.restaurantId = existingFood.restaurantId; // Prevent overwriting restaurantId
-
-    // Ensure image field is properly updated
-    if (req.file) {
-      updateData.image = `/image/${req.file.filename}`;
-    } else {
-      updateData.image = existingFood.image; // Retain existing image if no new file is uploaded
+    // Update price if changed
+    if (price !== undefined) {
+        foodItem.price = price;
     }
 
-    // Remove `image` from updateData if it is an object instead of a string
-    if (typeof updateData.image === "object") {
-      delete updateData.image;
+    // Update discount and recalculate discountPrice
+    if (discount !== undefined) {
+        foodItem.discount = discount;
+        foodItem.discountPrice = discount > 0 ? foodItem.price - (foodItem.price * discount) / 100 : 0;
     }
 
-    const updatedFood = await FoodItem.findByIdAndUpdate(req.params.id, updateData, { new: true });
-    res.json({ message: "Food item updated successfully!", food: updatedFood });
-  } catch (error) {
-    console.error("Error updating food item:", error);
-    res.status(500).json({ error: "Failed to update food item" });
-  }
+    // Update availability
+    foodItem.availability = availability || foodItem.availability;
+
+    await foodItem.save();
+    res.json({ message: "Food item updated successfully", foodItem });
+} catch (error) {
+    res.status(500).json({ error: "Internal server error" });
+}
 });
 
 
