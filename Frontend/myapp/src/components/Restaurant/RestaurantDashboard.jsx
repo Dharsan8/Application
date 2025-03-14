@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { FaUserCircle, FaPlus, FaEdit, FaTrash, FaBars,FaCommentDots,FaCheck, FaTimes, FaEye} from "react-icons/fa";
+import {
+  FaUserCircle,
+  FaPlus,
+  FaEdit,
+  FaTrash,
+  FaBars,
+  FaCommentDots,
+  FaCheck,
+  FaTimes,
+  FaEye,
+} from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import AddItem from "./Add-item";
@@ -41,7 +51,9 @@ export default function RestaurantDashboard() {
   const fetchFoodItems = async (restaurantId) => {
     if (!restaurantId) return;
     try {
-      const response = await axios.get(`http://localhost:3000/api/food/${restaurantId}`);
+      const response = await axios.get(
+        `http://localhost:3000/api/food/${restaurantId}`
+      );
       setFoodItems(response.data);
     } catch (error) {
       console.error("Error fetching food items:", error);
@@ -64,20 +76,28 @@ export default function RestaurantDashboard() {
     navigate("/restaurant-login");
   };
 
-  
   const handleUpdate = async (foodId, updatedData) => {
     try {
-      const response = await axios.put(`http://localhost:3000/api/food/update/${foodId}`, updatedData);
-  
+      const response = await axios.put(
+        `http://localhost:3000/api/food/update/${foodId}`,
+        updatedData
+      );
+
       setFoodItems((prevItems) =>
         prevItems.map((item) =>
           item._id === foodId
-            ? { 
-                ...item, 
-                ...updatedData, 
-                discountPrice: updatedData.discount > 0 
-                  ? Number((updatedData.price - (updatedData.price * updatedData.discount) / 100).toFixed(2))
-                  : updatedData.price // Ensure it's a number
+            ? {
+                ...item,
+                ...updatedData,
+                discountPrice:
+                  updatedData.discount > 0
+                    ? Number(
+                        (
+                          updatedData.price -
+                          (updatedData.price * updatedData.discount) / 100
+                        ).toFixed(2)
+                      )
+                    : updatedData.price, // Ensure it's a number
               }
             : item
         )
@@ -86,25 +106,37 @@ export default function RestaurantDashboard() {
       console.error("Error updating food item:", error);
     }
   };
-  
-
 
   return (
     <div className="flex min-h-screen">
       {/* Sidebar */}
-      <div className={`bg-[#8A4F7D] text-white h-screen p-5 transition-all flex flex-col ${sidebarOpen ? "w-56" : "w-16"}`}>
-  <div className="flex items-center justify-between mb-6">
-    <h2 className={`text-xl font-bold transition-all ${sidebarOpen ? "opacity-100" : "opacity-0 w-0 overflow-hidden"}`}>
-      {restaurant?.restaurantName || "Restaurant"}
-    </h2>
-    <FaBars className="text-white text-2xl cursor-pointer" onClick={() => setSidebarOpen(!sidebarOpen)} />
-  </div>
+      <div
+        className={`bg-[#8A4F7D] text-white h-screen p-5 transition-all flex flex-col ${
+          sidebarOpen ? "w-56" : "w-16"
+        }`}
+        style={{ height: "100vh", overflowY: "auto" }}
+      >
+        <div className="flex items-center justify-between mb-6">
+          <h2
+            className={`text-xl font-bold transition-all ${
+              sidebarOpen ? "opacity-100" : "opacity-0 w-0 overflow-hidden"
+            }`}
+          >
+            {restaurant?.restaurantName || "Restaurant"}
+          </h2>
+          <FaBars
+            className="text-white text-2xl cursor-pointer"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+          />
+        </div>
 
-  {sidebarOpen && (
-             <nav className=" flex flex-col flex-grow justify-center items-center space-y-4">
+        {sidebarOpen && (
+          <nav className="flex flex-col flex-grow justify-center items-center space-y-4">
             <button
               className={`flex items-center space-x-3 w-full py-3 px-4 rounded-md transition ${
-                activePage === "viewItems" ? "bg-[#6B3A63]" : "hover:bg-[#6B3A63]"
+                activePage === "viewItems"
+                  ? "bg-[#6B3A63]"
+                  : "hover:bg-[#6B3A63]"
               }`}
               onClick={() => setActivePage("viewItems")}
             >
@@ -114,7 +146,9 @@ export default function RestaurantDashboard() {
 
             <button
               className={`flex items-center space-x-3 w-full py-3 px-4 rounded-md transition ${
-                activePage === "addItem" ? "bg-[#6B3A63]" : "hover:bg-[#6B3A63]"
+                activePage === "addItem"
+                  ? "bg-[#6B3A63]"
+                  : "hover:bg-[#6B3A63]"
               }`}
               onClick={() => setActivePage("addItem")}
             >
@@ -122,10 +156,11 @@ export default function RestaurantDashboard() {
               <span>Create Item</span>
             </button>
 
-
             <button
               className={`flex items-center space-x-3 w-full py-3 px-4 rounded-md transition ${
-                activePage === "feedback" ? "bg-[#6B3A63]" : "hover:bg-[#6B3A63]"
+                activePage === "feedback"
+                  ? "bg-[#6B3A63]"
+                  : "hover:bg-[#6B3A63]"
               }`}
               onClick={() => setActivePage("feedback")}
             >
@@ -133,52 +168,75 @@ export default function RestaurantDashboard() {
               <span>Feedback</span>
             </button>
           </nav>
-)}
-</div>
+        )}
+      </div>
 
       {/* Main Content */}
-      <div className="flex-1 bg-gray-100">
+      <div className="flex-1 bg-gray-100" style={{ overflowY: "auto" }}>
         {/* Navbar */}
         <nav className="bg-[#8A4F7D] p-4 flex justify-between items-center shadow-lg relative">
-        <h1 className="text-white text-2xl font-extrabold tracking-wide uppercase">Restaurant Dashboard</h1>
-        {restaurant && (
-          <div className="relative">
-            <FaUserCircle
-              className="text-white text-4xl cursor-pointer hover:scale-110 transition-transform duration-200"
-              onClick={() => setIsOpen(!isOpen)}
-            />
-            {isOpen && (
-              <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-2xl p-5 border border-gray-200">
-                <h2 className="text-xl font-semibold text-[#8A4F7D] text-center border-b pb-2">{restaurant.restaurantName}</h2>
-                <div className="mt-3 space-y-2 text-gray-800">
-                  <p className="flex justify-between"><span className="font-semibold">Owner:</span> {restaurant.ownerName}</p>
-                  <p className="flex justify-between"><span className="font-semibold">Location:</span> {restaurant.location}</p>
-                  <p className="flex justify-between"><span className="font-semibold">Email:</span> {restaurant.email}</p>
-                  <p className="flex justify-between"><span className="font-semibold">Phone:</span> {restaurant.phoneNumber}</p>
+          <h1 className="text-white text-2xl font-extrabold tracking-wide uppercase">
+            Restaurant Dashboard
+          </h1>
+          {restaurant && (
+            <div className="relative">
+              <FaUserCircle
+                className="text-white text-4xl cursor-pointer hover:scale-110 transition-transform duration-200"
+                onClick={() => setIsOpen(!isOpen)}
+              />
+              {isOpen && (
+                <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-2xl p-5 border border-gray-200">
+                  <h2 className="text-xl font-semibold text-[#8A4F7D] text-center border-b pb-2">
+                    {restaurant.restaurantName}
+                  </h2>
+                  <div className="mt-3 space-y-2 text-gray-800">
+                    <p className="flex justify-between">
+                      <span className="font-semibold">Owner:</span>{" "}
+                      {restaurant.ownerName}
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="font-semibold">Location:</span>{" "}
+                      {restaurant.location}
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="font-semibold">Email:</span>{" "}
+                      {restaurant.email}
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="font-semibold">Phone:</span>{" "}
+                      {restaurant.phoneNumber}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="mt-4 w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 rounded-lg transition-all font-semibold shadow-md hover:shadow-lg"
+                  >
+                    Logout
+                  </button>
                 </div>
-                <button
-                  onClick={handleLogout}
-                  className="mt-4 w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 rounded-lg transition-all font-semibold shadow-md hover:shadow-lg"
-                >
-                  Logout
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-      </nav>
+              )}
+            </div>
+          )}
+        </nav>
 
         {/* Food Items Section */}
-        <div className="p-6">
+        <div className="p-6" style={{ height: "calc(100vh - 80px)", overflowY: "auto" }}> {/* Adjusted height for content */}
           {activePage === "viewItems" && (
             <div>
-              <h2 className="text-3xl font-bold text-gray-800">Your Food Items</h2>
+              <h2 className="text-3xl font-bold text-gray-800">
+                Your Food Items
+              </h2>
               {foodItems.length === 0 ? (
                 <p className="text-gray-600 mt-2">No food items added yet.</p>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
                   {foodItems.map((item) => (
-                    <FoodCard key={item._id} item={item} onDelete={handleDelete} onUpdate={handleUpdate} />
+                    <FoodCard
+                      key={item._id}
+                      item={item}
+                      onDelete={handleDelete}
+                      onUpdate={handleUpdate}
+                    />
                   ))}
                 </div>
               )}
@@ -187,7 +245,6 @@ export default function RestaurantDashboard() {
           {activePage === "addItem" && <AddItem />}
           {activePage === "feedback" && <Feedback />}
         </div>
-
       </div>
     </div>
   );
@@ -195,9 +252,10 @@ export default function RestaurantDashboard() {
 const FoodCard = ({ item, onDelete, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedPrice, setEditedPrice] = useState(item.price);
-  const [editedAvailability, setEditedAvailability] = useState(item.availability);
+  const [editedAvailability, setEditedAvailability] = useState(
+    item.availability
+  );
   const [editedDiscount, setEditedDiscount] = useState(item.discount || 0);
-
 
   const discountedPrice = editedPrice - (editedPrice * editedDiscount) / 100;
 
@@ -214,110 +272,123 @@ const FoodCard = ({ item, onDelete, onUpdate }) => {
 
   return (
     <div className="bg-white shadow-md rounded-xl p-3 border border-gray-200 w-64 relative">
-    {/* Discount Badge */}
-    {item.discount > 0 && (
-      <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-lg shadow-md">
-        {item.discount}% OFF
-      </div>
-    )}
-
-    {/* Product Image */}
-    <img
-      src={`http://localhost:3000${item.image}`}
-      alt={item.name}
-      className="w-full h-28 object-cover rounded-lg"
-    />
-
-    {/* Product Name & Category */}
-    <h3 className="text-lg font-semibold mt-2 text-gray-800 truncate">{item.name}</h3>
-    <p className="text-sm text-gray-500">{item.category}</p>
-
-    {/* Price & Availability in One Row */}
-    <div className="mt-2 flex justify-between items-center">
-      {isEditing ? (
-        <div className="flex flex-col space-y-2 w-full">
-          {/* Price Input */}
-          <input
-            type="number"
-            value={editedPrice}
-            onChange={(e) => setEditedPrice(e.target.value)}
-            className="w-full border border-gray-300 p-1 rounded text-sm"
-            placeholder="Price (₹)"
-          />
-
-          {/* Discount Input */}
-          <input
-            type="number"
-            value={editedDiscount}
-            onChange={(e) => setEditedDiscount(e.target.value)}
-            className="w-full border border-gray-300 p-1 rounded text-sm"
-            placeholder="Discount %"
-          />
-
-          {/* Availability Dropdown */}
-          <select
-            value={editedAvailability}
-            onChange={(e) => setEditedAvailability(e.target.value)}
-            className="w-full border border-gray-300 p-1 rounded text-sm"
-          >
-            <option value="Available">Available</option>
-            <option value="Out of Stock">Out of Stock</option>
-          </select>
+      {/* Discount Badge */}
+      {item.discount > 0 && (
+        <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-lg shadow-md">
+          {item.discount}% OFF
         </div>
-      ) : (
-        <div className="flex justify-between items-center w-full">
-          {/* Price Display */}
-          <div className="flex items-center space-x-2">
-            {item.discount > 0 ? (
-              <>
-                <p className="text-gray-500 line-through text-sm">₹{item.price}</p>
-                <p className="font-semibold text-green-600 text-base">
-                  ₹{item.discountPrice.toFixed(2)}
-                </p>
-              </>
-            ) : (
-              <p className="font-semibold text-gray-700 text-base">₹{item.price}</p>
-            )}
+      )}
+
+      {/* Product Image */}
+      <img
+        src={`http://localhost:3000${item.image}`}
+        alt={item.name}
+        className="w-full h-28 object-cover rounded-lg"
+      />
+
+      {/* Product Name & Category */}
+      <h3 className="text-lg font-semibold mt-2 text-gray-800 truncate">
+        {item.name}
+      </h3>
+      <p className="text-sm text-gray-500">{item.category}</p>
+
+      {/* Price & Availability in One Row */}
+      <div className="mt-2 flex justify-between items-center">
+        {isEditing ? (
+          <div className="flex flex-col space-y-2 w-full">
+            {/* Price Input */}
+            <input
+              type="number"
+              value={editedPrice}
+              onChange={(e) => setEditedPrice(e.target.value)}
+              className="w-full border border-gray-300 p-1 rounded text-sm"
+              placeholder="Price (₹)"
+            />
+
+            {/* Discount Input */}
+            <input
+              type="number"
+              value={editedDiscount}
+              onChange={(e) => setEditedDiscount(e.target.value)}
+              className="w-full border border-gray-300 p-1 rounded text-sm"
+              placeholder="Discount %"
+            />
+
+            {/* Availability Dropdown */}
+            <select
+              value={editedAvailability}
+              onChange={(e) => setEditedAvailability(e.target.value)}
+              className="w-full border border-gray-300 p-1 rounded text-sm"
+            >
+              <option value="Available">Available</option>
+              <option value="Out of Stock">Out of Stock</option>
+            </select>
           </div>
+        ) : (
+          <div className="flex justify-between items-center w-full">
+            {/* Price Display */}
+            <div className="flex items-center space-x-2">
+              {item.discount > 0 ? (
+                <>
+                  <p className="text-gray-500 line-through text-sm">
+                    ₹{item.price}
+                  </p>
+                  <p className="font-semibold text-green-600 text-base">
+                    ₹{item.discountPrice.toFixed(2)}
+                  </p>
+                </>
+              ) : (
+                <p className="font-semibold text-gray-700 text-base">
+                  ₹{item.price}
+                </p>
+              )}
+            </div>
 
-          {/* Availability Status */}
-          <p className={`font-semibold text-sm ${item.availability === "Available" ? "text-green-600" : "text-red-600"}`}>
-            {item.availability}
-          </p>
-        </div>
-      )}
-    </div>
+            {/* Availability Status */}
+            <p
+              className={`font-semibold text-sm ${
+                item.availability === "Available"
+                  ? "text-green-600"
+                  : "text-red-600"
+              }`}
+            >
+              {item.availability}
+            </p>
+          </div>
+        )}
+      </div>
 
-    {/* Action Buttons */}
-    <div className="flex justify-between mt-3 space-x-1">
-      {/* Edit/Save Button */}
-      <button
-        className={`${isEditing ? "bg-green-500" : "bg-blue-500"} text-white text-xs px-2 py-1 rounded-md flex items-center`}
-        onClick={() => (isEditing ? saveChanges() : setIsEditing(true))}
-      >
-        {isEditing ? <FaCheck className="mr-1" /> : <FaEdit className="mr-1" />}
-        {isEditing ? "Save" : "Edit"}
-      </button>
-
-      {/* Cancel Button (Only during Edit Mode) */}
-      {isEditing && (
+      {/* Action Buttons */}
+      <div className="flex justify-between mt-3 space-x-1">
+        {/* Edit/Save Button */}
         <button
-          className="bg-gray-500 text-white text-xs px-2 py-1 rounded-md flex items-center"
-          onClick={() => setIsEditing(false)}
+          className={`${
+            isEditing ? "bg-green-500" : "bg-blue-500"
+          } text-white text-xs px-2 py-1 rounded-md flex items-center`}
+          onClick={() => (isEditing ? saveChanges() : setIsEditing(true))}
         >
-          <FaTimes />
+          {isEditing ? <FaCheck className="mr-1" /> : <FaEdit className="mr-1" />}
+          {isEditing ? "Save" : "Edit"}
         </button>
-      )}
 
-      {/* Delete Button */}
-      <button
-        className="bg-red-500 text-white text-xs px-2 py-1 rounded-md flex items-center"
-        onClick={() => onDelete(item._id)}
-      >
-        <FaTrash className="mr-1" /> Delete
-      </button>
+        {/* Cancel Button (Only during Edit Mode) */}
+        {isEditing && (
+          <button
+            className="bg-gray-500 text-white text-xs px-2 py-1 rounded-md flex items-center"
+            onClick={() => setIsEditing(false)}
+          >
+            <FaTimes />
+          </button>
+        )}
+
+        {/* Delete Button */}
+        <button
+          className="bg-red-500 text-white text-xs px-2 py-1 rounded-md flex items-center"
+          onClick={() => onDelete(item._id)}
+        >
+          <FaTrash className="mr-1" /> Delete
+        </button>
+      </div>
     </div>
-  </div>
-
   );
 };
