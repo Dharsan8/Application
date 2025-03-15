@@ -1,3 +1,4 @@
+// RestaurantDashboard.js
 import React, { useState, useEffect } from "react";
 import {
   FaUserCircle,
@@ -41,7 +42,6 @@ export default function RestaurantDashboard() {
       }
 
       setRestaurant(parsedRestaurant);
-      fetchFoodItems(parsedRestaurant.restaurantID);
     } catch (error) {
       console.error("Error parsing restaurant data:", error);
       navigate("/restaurant-login");
@@ -60,7 +60,18 @@ export default function RestaurantDashboard() {
     }
   };
 
-  // Delete food item
+  const refreshFoodItems = () => {
+    if (restaurant && restaurant.restaurantID) {
+      fetchFoodItems(restaurant.restaurantID);
+    }
+  };
+
+  useEffect(() => {
+    if (restaurant && restaurant.restaurantID) {
+      fetchFoodItems(restaurant.restaurantID);
+    }
+  }, [restaurant, navigate]);
+
   const handleDelete = async (foodId) => {
     try {
       await axios.delete(`http://localhost:3000/api/food/delete/${foodId}`);
@@ -70,7 +81,6 @@ export default function RestaurantDashboard() {
     }
   };
 
-  // Logout function
   const handleLogout = () => {
     localStorage.removeItem("restaurantData");
     navigate("/restaurant-login");
@@ -97,7 +107,7 @@ export default function RestaurantDashboard() {
                           (updatedData.price * updatedData.discount) / 100
                         ).toFixed(2)
                       )
-                    : updatedData.price, // Ensure it's a number
+                    : updatedData.price,
               }
             : item
         )
@@ -109,7 +119,6 @@ export default function RestaurantDashboard() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
       <div
         className={`bg-[#8A4F7D] text-white h-screen p-5 transition-all flex flex-col ${
           sidebarOpen ? "w-56" : "w-16"
@@ -171,9 +180,7 @@ export default function RestaurantDashboard() {
         )}
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 bg-gray-100 relative">
-        {/* Navbar */}
         <nav className="bg-[#8A4F7D] p-4 flex justify-between items-center shadow-lg relative">
           <h1 className="text-white text-2xl font-extrabold tracking-wide uppercase">
             Restaurant Dashboard
@@ -185,7 +192,7 @@ export default function RestaurantDashboard() {
                 onClick={() => setIsOpen(!isOpen)}
               />
               {isOpen && (
-                <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-2xl p-5 border border-gray-200 z-50"> {/* Added z-50 */}
+                <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-2xl p-5 border border-gray-200 z-50">
                   <h2 className="text-xl font-semibold text-[#8A4F7D] text-center border-b pb-2">
                     {restaurant.restaurantName}
                   </h2>
@@ -216,12 +223,13 @@ export default function RestaurantDashboard() {
                 </div>
               )}
             </div>
-
           )}
         </nav>
 
-        {/* Food Items Section */}
-        <div className="p-6" style={{ height: "calc(100vh - 80px)", overflowY: "auto" }}>
+        <div
+          className="p-6"
+          style={{ height: "calc(100vh - 80px)", overflowY: "auto" }}
+        >
           {activePage === "viewItems" && (
             <div>
               <h2 className="text-3xl font-bold text-gray-800">
@@ -243,13 +251,16 @@ export default function RestaurantDashboard() {
               )}
             </div>
           )}
-          {activePage === "addItem" && <AddItem />}
+          {activePage === "addItem" && (
+            <AddItem onFoodItemAdded={refreshFoodItems} />
+          )}
           {activePage === "feedback" && <Feedback />}
         </div>
       </div>
     </div>
   );
 }
+
 const FoodCard = ({ item, onDelete, onUpdate }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedPrice, setEditedPrice] = useState(item.price);
@@ -262,42 +273,37 @@ const FoodCard = ({ item, onDelete, onUpdate }) => {
 
   const saveChanges = () => {
     const updatedData = {
-      price: editedPrice, // Always update price
-      discount: editedDiscount, // Update discount if applied
+      price: editedPrice,
+      discount: editedDiscount,
       availability: editedAvailability,
     };
 
-    onUpdate(item._id, updatedData); // Send updated data to backend
+    onUpdate(item._id, updatedData);
     setIsEditing(false);
   };
 
   return (
     <div className="bg-white shadow-md rounded-xl p-3 border border-gray-200 w-64 relative">
-      {/* Discount Badge */}
       {item.discount > 0 && (
         <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-lg shadow-md">
           {item.discount}% OFF
         </div>
       )}
 
-      {/* Product Image */}
       <img
         src={`http://localhost:3000${item.image}`}
         alt={item.name}
-        className="w-full h-28 object-cover rounded-lg"
+        className="w -full h-28 object-cover rounded-lg"
       />
 
-      {/* Product Name & Category */}
       <h3 className="text-lg font-semibold mt-2 text-gray-800 truncate">
         {item.name}
       </h3>
       <p className="text-sm text-gray-500">{item.category}</p>
 
-      {/* Price & Availability in One Row */}
       <div className="mt-2 flex justify-between items-center">
         {isEditing ? (
           <div className="flex flex-col space-y-2 w-full">
-            {/* Price Input */}
             <input
               type="number"
               value={editedPrice}
@@ -306,7 +312,6 @@ const FoodCard = ({ item, onDelete, onUpdate }) => {
               placeholder="Price (₹)"
             />
 
-            {/* Discount Input */}
             <input
               type="number"
               value={editedDiscount}
@@ -315,7 +320,6 @@ const FoodCard = ({ item, onDelete, onUpdate }) => {
               placeholder="Discount %"
             />
 
-            {/* Availability Dropdown */}
             <select
               value={editedAvailability}
               onChange={(e) => setEditedAvailability(e.target.value)}
@@ -327,7 +331,6 @@ const FoodCard = ({ item, onDelete, onUpdate }) => {
           </div>
         ) : (
           <div className="flex justify-between items-center w-full">
-            {/* Price Display */}
             <div className="flex items-center space-x-2">
               {item.discount > 0 ? (
                 <>
@@ -345,7 +348,6 @@ const FoodCard = ({ item, onDelete, onUpdate }) => {
               )}
             </div>
 
-            {/* Availability Status */}
             <p
               className={`font-semibold text-sm ${
                 item.availability === "Available"
@@ -359,9 +361,7 @@ const FoodCard = ({ item, onDelete, onUpdate }) => {
         )}
       </div>
 
-      {/* Action Buttons */}
       <div className="flex justify-between mt-3 space-x-1">
-        {/* Edit/Save Button */}
         <button
           className={`${
             isEditing ? "bg-green-500" : "bg-blue-500"
@@ -372,7 +372,6 @@ const FoodCard = ({ item, onDelete, onUpdate }) => {
           {isEditing ? "Save" : "Edit"}
         </button>
 
-        {/* Cancel Button (Only during Edit Mode) */}
         {isEditing && (
           <button
             className="bg-gray-500 text-white text-xs px-2 py-1 rounded-md flex items-center"
@@ -382,7 +381,6 @@ const FoodCard = ({ item, onDelete, onUpdate }) => {
           </button>
         )}
 
-        {/* Delete Button */}
         <button
           className="bg-red-500 text-white text-xs px-2 py-1 rounded-md flex items-center"
           onClick={() => onDelete(item._id)}
@@ -393,3 +391,8 @@ const FoodCard = ({ item, onDelete, onUpdate }) => {
     </div>
   );
 };
+
+
+
+
+
