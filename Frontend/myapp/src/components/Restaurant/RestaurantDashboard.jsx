@@ -172,34 +172,51 @@ export default function RestaurantDashboard() {
       </div>
 
       {/* Main Content */}
-    <div className="flex-1 bg-gray-100">
-            {/* Navbar */}
-            <nav className="bg-[#8A4F7D] p-4 flex justify-between items-center shadow-lg relative">
-            <h1 className="text-white text-2xl font-extrabold tracking-wide uppercase">Restaurant Dashboard</h1>
-            {restaurant && (
-              <div className="relative">
-                <FaUserCircle
-                  className="text-white text-4xl cursor-pointer hover:scale-110 transition-transform duration-200"
-                  onClick={() => setIsOpen(!isOpen)}
-                />
-                {isOpen && (
-                  <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-2xl p-5 border border-gray-200">
-                    <h2 className="text-xl font-semibold text-[#8A4F7D] text-center border-b pb-2">{restaurant.restaurantName}</h2>
-                    <div className="mt-3 space-y-2 text-gray-800">
-                      <p className="flex justify-between"><span className="font-semibold">Owner:</span> {restaurant.ownerName}</p>
-                      <p className="flex justify-between"><span className="font-semibold">Location:</span> {restaurant.location}</p>
-                      <p className="flex justify-between"><span className="font-semibold">Email:</span> {restaurant.email}</p>
-                      <p className="flex justify-between"><span className="font-semibold">Phone:</span> {restaurant.phoneNumber}</p>
-                    </div>
-                    <button
-                      onClick={handleLogout}
-                      className="mt-4 w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 rounded-lg transition-all font-semibold shadow-md hover:shadow-lg"
-                    >
-                      Logout
-                    </button>
+      <div className="flex-1 bg-gray-100 relative">
+        {/* Navbar */}
+        <nav className="bg-[#8A4F7D] p-4 flex justify-between items-center shadow-lg relative">
+          <h1 className="text-white text-2xl font-extrabold tracking-wide uppercase">
+            Restaurant Dashboard
+          </h1>
+          {restaurant && (
+            <div className="relative">
+              <FaUserCircle
+                className="text-white text-4xl cursor-pointer hover:scale-110 transition-transform duration-200"
+                onClick={() => setIsOpen(!isOpen)}
+              />
+              {isOpen && (
+                <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-2xl p-5 border border-gray-200 z-50"> {/* Added z-50 */}
+                  <h2 className="text-xl font-semibold text-[#8A4F7D] text-center border-b pb-2">
+                    {restaurant.restaurantName}
+                  </h2>
+                  <div className="mt-3 space-y-2 text-gray-800">
+                    <p className="flex justify-between">
+                      <span className="font-semibold">Owner:</span>{" "}
+                      {restaurant.ownerName}
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="font-semibold">Location:</span>{" "}
+                      {restaurant.location}
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="font-semibold">Email:</span>{" "}
+                      {restaurant.email}
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="font-semibold">Phone:</span>{" "}
+                      {restaurant.phoneNumber}
+                    </p>
                   </div>
-                )}
-              </div>
+                  <button
+                    onClick={handleLogout}
+                    className="mt-4 w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 rounded-lg transition-all font-semibold shadow-md hover:shadow-lg"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+
           )}
         </nav>
 
