@@ -11,6 +11,7 @@ const LandingPage = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
+          className="text-xl font-extrabold text-blue-700 tracking-wide"
         >
           Foodie
         </motion.h1>
