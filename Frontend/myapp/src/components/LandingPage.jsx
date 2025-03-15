@@ -34,7 +34,7 @@ const LandingPage = () => {
 
       {/* Hero Section */}
       <div className="w-full h-screen flex flex-col items-center justify-center bg-cover bg-center relative text-white" 
-        style={{ backgroundImage: "url('/image/Foodimage.jpg')", opacity: "2.0" }}>
+        style={{ backgroundImage: "url('/image/backgroundfooddelviery.png')", opacity: "2.0" }}>
 
 
 

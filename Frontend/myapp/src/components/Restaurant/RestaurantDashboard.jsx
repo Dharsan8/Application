@@ -290,11 +290,12 @@ const FoodCard = ({ item, onDelete, onUpdate }) => {
         </div>
       )}
 
-      <img
-        src={`http://localhost:3000${item.image}`}
-        alt={item.name}
-        className="w -full h-28 object-cover rounded-lg"
-      />
+<img
+    src={`http://localhost:3000${item.image}`}
+    alt={item.name}
+    className="w-full h-32 object-cover rounded-lg" // Adjusted height
+    style={{aspectRatio: '1 / 1'}} //forces a 1/1 aspect ratio.
+/>
 
       <h3 className="text-lg font-semibold mt-2 text-gray-800 truncate">
         {item.name}
