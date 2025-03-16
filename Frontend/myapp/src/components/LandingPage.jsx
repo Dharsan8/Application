@@ -11,7 +11,7 @@ const LandingPage = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-xl font-extrabold text-blue-700 tracking-wide"
+          className="text-xl font-extrabold text-orange-500 tracking-wide"
         >
           Foodie
         </motion.h1>
@@ -25,7 +25,7 @@ const LandingPage = () => {
           </Link>
           <Link
             to="/admin-login"
-            className="px-4 py-2 rounded-full bg-[#264653] text-white text-sm font-medium shadow-sm hover:scale-105 transition-all"
+            className="px-3 py-2 rounded-full bg-[#264653] text-white text-sm font-medium shadow-sm hover:scale-105 transition-all"
           >
             Admin
           </Link>
@@ -48,7 +48,7 @@ const LandingPage = () => {
       <div
         className="w-full min-h-screen flex flex-col items-center justify-center relative text-white"
         style={{
-          backgroundImage: "url('/image/mexican-dishes-pepper.jpg')",
+          backgroundImage: "url('/image/background.png')",
           backgroundSize: "cover", // Full screen cover
           backgroundPosition: "center",
           //marginTop: "10px", // Adjust for navbar height (approx.)
@@ -61,10 +61,10 @@ const LandingPage = () => {
           transition={{ duration: 0.8 }}
           className="relative text-center max-w-4xl px-8"
         >
-          <h1 className="text-4xl md:text-6xl font-extrabold drop-shadow-lg text-blue-700">
+          <h1 className="text-4xl md:text-6xl font-extrabold drop-shadow-lg ">
             Savor Every Moment, One Dish at a Time.
           </h1>
-          <p className="text-xl md:text-xl font-extrabold drop-shadow-lg text-blue-700">
+          <p className="text-xl md:text-xl font-extrabold drop-shadow-lg ">
             Satisfy your cravings with exceptional cuisine from the finest local
             spots.
           </p>
