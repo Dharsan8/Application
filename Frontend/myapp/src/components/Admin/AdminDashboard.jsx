@@ -1,11 +1,19 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { FaChartPie, FaStore, FaComments, FaSignOutAlt, FaCheckCircle, FaTimesCircle, FaTrash, } from "react-icons/fa";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
 
 
 const AdminDashboard = () => {
   const [restaurants, setRestaurants] = useState([]);
   const [activeSection, setActiveSection] = useState("dashboard");
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    navigate("/admin-login");
+  };
 
   const toggleSection = (section) => {
     setOpenSection(openSection === section ? null : section);
@@ -55,105 +63,150 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#FAD961] to-[#F76B1C] text-gray-900 flex">
-      {/* Sidebar Navigation */}
-      <div className="w-20 bg-[#8A4F7D] text-white flex flex-col items-center py-6 shadow-xl rounded-r-2xl relative">
-        <h2 className="text-lg font-bold mb-6">Foodie</h2>
-        <div className="flex-1 flex flex-col justify-center gap-6">
-          <button
-            onClick={() => setActiveSection("restaurants")}
-            className="p-3 rounded-full hover:bg-[#7F5539] transition relative group"
-          >
-            <FaStore size={22} />
-            <span className="absolute left-14 px-2 py-1 bg-gray-800 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition">
-              Approvals
-            </span>
-          </button>
-          <button
-            onClick={() => setActiveSection("analytics")}
-            className="p-3 rounded-full hover:bg-[#7F5539] transition relative group"
-          >
-            <FaChartPie size={22} />
-            <span className="absolute left-14 px-2 py-1 bg-gray-800 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition">
-              Analytics
-            </span>
-          </button>
-          <button
-            onClick={() => setActiveSection("feedback")}
-            className="p-3 rounded-full hover:bg-[#7F5539] transition relative group"
-          >
-            <FaComments size={22} />
-            <span className="absolute left-14 px-2 py-1 bg-gray-800 text-white text-sm rounded-md opacity-0 group-hover:opacity-100 transition">
-              Feedback
-            </span>
-          </button>
-        </div>
-        <button className="p-3 rounded-full bg-red-500 hover:bg-red-600 transition">
-          <FaSignOutAlt size={22} />
-        </button>
-      </div>
+    <div className="min-h-screen bg-white text-gray-900 flex">
+      {/* sideNavbar */}
+      <div className="w-16 bg-[#8A4F7D] text-white flex flex-col items-center py-6 shadow-lg">
+      <motion.h1
+  initial={{ opacity: 0, x: -10 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.5 }}
+  className="text-lg font-bold text-orange-600 tracking-wide italic drop-shadow-md"
+>
+  Foodie
+</motion.h1>
+    <div className="flex-1 flex flex-col justify-center items-center gap-8">
+    <button
+  onClick={() => setActiveSection("restaurants")}
+  className="p-4 rounded-full hover:bg-[#7F5539] transition relative group flex justify-center items-center"
+>
+  <span className="absolute -top-8 px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition">
+    Approvals
+  </span>
+  <FaStore size={26} />
+</button>
 
-      {/* Main Content */}
-      <div className="flex-1 p-8 flex flex-col">
-        <div className="bg-[#8A4F7D] text-white text-center p-6 rounded-xl shadow-xl w-full mb-8">
-          <h1 className="text-3xl font-extrabold">Admin Dashboard</h1>
-        </div>
+<button
+  onClick={() => setActiveSection("analytics")}
+  className="p-4 rounded-full hover:bg-[#7F5539] transition relative group flex justify-center items-center"
+>
+  <span className="absolute -top-8 px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition">
+    Analytics
+  </span>
+  <FaChartPie size={26} />
+</button>
+
+<button
+  onClick={() => setActiveSection("feedback")}
+  className="p-4 rounded-full hover:bg-[#7F5539] transition relative group flex justify-center items-center"
+>
+  <span className="absolute -top-8 px-2 py-1 bg-gray-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 transition">
+    Feedback
+  </span>
+  <FaComments size={26} />
+</button>
+    </div>
+    <button 
+      onClick={handleLogout}
+      className="p-4 rounded-full bg-red-500 hover:bg-red-600 transition flex justify-center items-center"
+    >
+      <FaSignOutAlt size={18} />
+    </button>
+  </div>
+
+  {/* Main Content */}
+  <div className="flex-1 flex flex-col">
+    {/* Top Navbar */}
+    <div className="w-full bg-[#8A4F7D] text-white text-center py-3 shadow-md">
+      <h1 className="text-lg font-bold">Admin Dashboard</h1>
+    </div>
 
         {/* Section Rendering */}
         <div className="flex-1">
-          {activeSection === "restaurants" && (
-            <div className="w-full max-w-6xl p-6 bg-[#E1C699] rounded-xl shadow-xl transition-opacity duration-300 animate-fadeIn">
-            <h2 className="text-3xl font-bold text-[#7F5539] mb-6 text-center">Registered Restaurants</h2>
-            
-            {restaurants.length === 0 ? (
-              <p className="text-gray-500 p-6 text-lg text-center">No registered restaurants found.</p>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {restaurants.map((restaurant) => (
-                  <div key={restaurant._id} className="bg-white shadow-lg rounded-xl p-6 transform hover:scale-105 transition duration-300">
-                    <h2 className="text-xl font-semibold text-[#7F5539] mb-2">{restaurant.restaurantName}</h2>
-                    <p className="text-md font-bold text-[#7F5539]">Location: <span className="font-normal text-[#9C6644]">{restaurant.location}</span></p>
-                    <p className="text-md font-bold text-[#7F5539]">Owner: <span className="font-normal text-[#9C6644]">{restaurant.ownerName}</span></p>
-                    <p className="text-md font-bold text-[#7F5539]">Contact: <span className="font-normal text-[#9C6644]">{restaurant.phoneNumber}</span></p>
-                    <p className="text-md font-bold text-[#7F5539]">Email: <span className="font-normal text-[#9C6644]">{restaurant.email}</span></p>
-                    <p className="text-sm font-semibold text-[#B08968] mt-2">Status: Not Approved</p>
-                    
-                    <div className="flex gap-2 mt-4">
-                      <button
-                        onClick={() => handleApproval(restaurant, "Approved")}
-                        className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2"
-                      >
-                        <FaCheckCircle size={16} /> Approve
-                      </button>
-                      <button
-                        onClick={() => handleApproval(restaurant, "Not Approved")}
-                        className="px-4 py-2 text-sm bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition flex items-center gap-2"
-                      >
-                        <FaTimesCircle size={16} /> Reject
-                      </button>
-                      <button
-                        onClick={() => handleDelete(restaurant._id, restaurant.email)}
-                        className="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2"
-                      >
-                        <FaTrash size={16} /> Delete
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>          
-          )}
+        {activeSection === "restaurants" && (
+  <div className="w-full max-w-6xl p-6">
+<h2 className="text-3xl font-bold text-[#7F5539] text-center mb-6 uppercase tracking-wide relative">
+  <span className="px-4 py-1 bg-[#E1C699] rounded-lg shadow-md">
+    🍽️ Registered Restaurants
+  </span>
+</h2>
+
+
+
+
+    {restaurants.length === 0 ? (
+      <p className="text-gray-500 p-6 text-lg text-center">
+        No registered restaurants found.
+      </p>
+    ) : (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {restaurants.map((restaurant) => (
+          <div
+            key={restaurant._id}
+            className="relative bg-white/80 backdrop-blur-xl p-6 rounded-3xl shadow-2xl border border-gray-300 hover:shadow-3xl transition-transform transform hover:-translate-y-2 flex flex-col"
+          >
+            {/* Card Header */}
+            <div className="absolute top-4 right-4 bg-yellow-500 text-white px-3 py-1 text-xs font-semibold rounded-full shadow-md">
+              Not Approved
+            </div>
+
+            {/* Restaurant Details */}
+            <h2 className="text-2xl font-bold text-[#7F5539] mb-3 text-center">
+              {restaurant.restaurantName}
+            </h2>
+
+            <div className="space-y-2 text-gray-700 text-sm">
+              <p className="flex items-center gap-2">
+              <span className="font-bold"> Location : </span> <span className="font-medium">{restaurant.location}</span>
+              </p>
+              <p className="flex items-center gap-2">
+              <span className="font-bold"> OwnerName :</span> <span className="font-medium">{restaurant.ownerName}</span>
+              </p>
+              <p className="flex items-center gap-2">
+              <span className="font-bold"> Phone : </span> <span className="font-medium">{restaurant.phoneNumber}</span>
+              </p>
+              <p className="flex items-center gap-2">
+             <span className="font-bold"> Email: </span> <span className="font-normal text-gray-600">{restaurant.email}</span>
+              </p>
+            </div>
+
+            {/* Buttons */}
+            <div className="mt-6 flex justify-between">
+              <button
+                onClick={() => handleApproval(restaurant, "Approved")}
+                className="flex-1 px-4 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-2 shadow-lg"
+              >
+                <FaCheckCircle size={14} /> Approve
+              </button>
+              <button
+                onClick={() => handleApproval(restaurant, "Not Approved")}
+                className="flex-1 px-4 py-2 text-sm bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition flex items-center justify-center gap-2 shadow-lg mx-2"
+              >
+                <FaTimesCircle size={14} /> Reject
+              </button>
+              <button
+                onClick={() => handleDelete(restaurant._id, restaurant.email)}
+                className="flex-1 px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center justify-center gap-2 shadow-lg"
+              >
+                <FaTrash size={14} /> Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
+)}
+
 
           {activeSection === "analytics" && (
-            <div className="p-6 bg-[#E1C699] rounded-xl shadow-xl">
+            <div className="w-full max-w-6xl p-6">
               <h2 className="text-3xl font-bold text-[#7F5539] mb-4">Analytics Overview</h2>
               <p className="text-lg text-gray-700">Track performance and insights...</p>
             </div>
           )}
 
           {activeSection === "feedback" && (
-            <div className="p-6 bg-[#E1C699] rounded-xl shadow-xl">
+            <div className="w-full max-w-6xl p-6">
               <h2 className="text-3xl font-bold text-[#7F5539] mb-4">User Feedback</h2>
               <p className="text-lg text-gray-700">Review and respond to user feedback...</p>
             </div>
