@@ -18,6 +18,7 @@ app.use(cors({
 
 app.use("/image", express.static(path.join(__dirname, "Public/image")));
 
+app.use("/api/customer", require("./routes/customerdetails"));
 
 // Connect MongoDB
 connectDb();
