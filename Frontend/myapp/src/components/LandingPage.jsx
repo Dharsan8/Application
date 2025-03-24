@@ -101,8 +101,9 @@ const LandingPage = () => {
             </div>
           ) : (
             <button
-              onClick={handleLoginClick}
+              // onClick={handleLoginClick}
               className="px-4 py-2 rounded-[11px] bg-[#2A9D8F] text-white text-sm font-medium shadow-sm hover:scale-105 transition-all"
+              onClick={() => window.location.href = "/login"}
             >
               Login
             </button>

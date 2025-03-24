@@ -9,12 +9,13 @@ import RestaurantLogin from "./components/Restaurant//RestaurantLoginId";
 import RestaurantDashboard from "./components/Restaurant//RestaurantDashboard";
 import AddItem from "./components/Restaurant/Add-item";
 import EditItem from "./components/Restaurant/Edit-item";
+import UserDashboard from "./components/User/UserDashboard";
 function App() {
   return (
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login/>} />
         <Route path="/restaurantreg" element={<RestaurantRegister/>}/>
         <Route path="/restaurant-login" element={<RestaurantLogin/>}/>
         <Route path="/restaurant-dashboard" element={<RestaurantDashboard/>}/>
@@ -24,6 +25,8 @@ function App() {
 
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} /> {/* ✅ New Route */}
+
+        <Route path="/user/:username" element={<UserDashboard/>} />
       </Routes>
     </Router>
   );
