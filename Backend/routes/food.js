@@ -20,13 +20,16 @@ const upload = multer({ storage: storage });
 // POST route to add a food item
 router.post("/add", upload.single("image"), async (req, res) => {
   try {
-    const { name, category, price, description, availability, vegNonVeg, customization, prepTime, restaurantId } = req.body;
+    const { 
+      name, category, price, description, availability, vegNonVeg, 
+      customization, prepTime, restaurantId, location, restaurantName 
+    } = req.body;
 
     if (!restaurantId) {
       return res.status(400).json({ error: "Restaurant ID is required!" });
     }
 
-    // ✅ Validate restaurantId from `restaurantcredential`
+    // Validate Restaurant ID
     const restaurantExists = await RestaurantCredential.findOne({ restaurantID: restaurantId });
     if (!restaurantExists) {
       return res.status(404).json({ error: "Restaurant ID not found in restaurantcredential!" });
@@ -45,9 +48,11 @@ router.post("/add", upload.single("image"), async (req, res) => {
       vegNonVeg,
       customization,
       prepTime,
-      restaurantId, // ✅ Keep as String
+      restaurantId,
+      location,        // ✅ Save in DB
+      restaurantName,  // ✅ Save in DB
       image: `/image/${req.file.filename}`,
-      discount : 0
+      discount: 0
     });
 
     await newFood.save();

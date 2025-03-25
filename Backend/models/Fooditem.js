@@ -13,6 +13,8 @@ const FoodItemSchema = new mongoose.Schema(
     prepTime: { type: String, required: true },
     image: { type: String, required: true }, // Image path
     restaurantId: { type: String, required: true },
+    location: String,        // ✅ Added
+  restaurantName: String,  // ✅ Added
     discount: { type: Number, default: 0 } 
   },
   { timestamps: true }

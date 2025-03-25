@@ -7,6 +7,7 @@ const authMiddleware = require("./middleware/auth");
 const restaurantRoutes = require("./routes/restaurantreg");
 const foodRoutes = require("./routes/food"); // ✅ Import food routes
 const path = require("path");
+const searchRoutes = require("./routes/search"); // Import search route
 
 const app = express();
 app.use(express.json());
@@ -32,7 +33,7 @@ app.get('/api/protected', authMiddleware, (req, res) => {
 
 app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/food', foodRoutes); // ✅ Use food routes separately
-
+app.use("/search", searchRoutes); // ✅ Add this
 
 
 
