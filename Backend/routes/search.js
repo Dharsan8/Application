@@ -1,9 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const FoodItem = require("../models/Fooditem");
 const RestaurantCredential = require("../models/RestaurantCredential");
 
-// Search food items by location or restaurant name
+// Search restaurants by name or location
 router.get("/", async (req, res) => {
     try {
         const { query } = req.query;
@@ -13,24 +12,17 @@ router.get("/", async (req, res) => {
         }
 
         // Find restaurants that match the search query
-        const restaurants = await RestaurantCredential.find({
-            $or: [
-                { restaurantName: { $regex: query, $options: "i" } },
-                { location: { $regex: query, $options: "i" } },
-            ],
-        });
+        const restaurants = await RestaurantCredential.find(
+            {
+                $or: [
+                    { restaurantName: { $regex: query, $options: "i" } },
+                    { location: { $regex: query, $options: "i" } },
+                ],
+            },
+            "restaurantName restaurantImage" // Return only restaurant name and image
+        );
 
-        if (restaurants.length === 0) {
-            return res.json([]); // No restaurants found
-        }
-
-        // Extract restaurant IDs
-        const restaurantIds = restaurants.map((restaurant) => restaurant.restaurantID);
-
-        // Find food items from these restaurants
-        const foodItems = await FoodItem.find({ restaurantId: { $in: restaurantIds } });
-
-        res.json(foodItems);
+        res.json(restaurants);
     } catch (error) {
         console.error("Error in search:", error);
         res.status(500).json({ error: "Server error! Please try again." });

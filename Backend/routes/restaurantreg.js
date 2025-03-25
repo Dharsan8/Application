@@ -3,6 +3,8 @@ const RestaurantRegister = require("../models/RestaurantRegister");
 const RestaurantCredential = require("../models/RestaurantCredential");
 const router = express.Router();
 const nodemailer = require("nodemailer"); // Add this at the top
+const multer = require("multer");
+const path = require("path");
 
 
 
@@ -79,27 +81,50 @@ router.post("/approve", async (req, res) => {
 });
 
 // ✅ Register a new restaurant
-router.post("/register", async (req, res) => {
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      cb(null, "uploads/"); // Ensure 'uploads' directory exists
+    },
+    filename: (req, file, cb) => {
+      cb(null, Date.now() + path.extname(file.originalname)); // Unique filename
+    },
+  });
+  
+  const upload = multer({ storage: storage });
+  
+  // Restaurant Registration API
+  router.post("/register", upload.single("restaurantImage"), async (req, res) => {
     try {
-        const newRestaurant = new RestaurantRegister(req.body);
-        await newRestaurant.save();
-        res.status(201).json({ message: "Restaurant registered successfully", data: newRestaurant });
+      const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+  
+      const newRestaurant = new RestaurantRegister({
+        ...req.body,
+        restaurantImage: imagePath, // Save image path in DB
+      });
+  
+      await newRestaurant.save();
+      res.status(201).json({ message: "Restaurant registered successfully" });
     } catch (error) {
-        console.error("Error saving restaurant:", error);
-        res.status(500).json({ error: error.message });
+      console.error("Error saving restaurant:", error);
+      res.status(500).json({ error: error.message });
     }
-});
+  });
+  
 
-// ✅ Fetch all registered restaurants
-router.get("/all", async (req, res) => {
+  
+  // ✅ Fetch all registered restaurants with images
+  router.get("/all", async (req, res) => {
     try {
-        const restaurants = await RestaurantRegister.find();
-        res.json(restaurants);
+      const restaurants = await RestaurantRegister.find();
+      res.json(restaurants);
     } catch (error) {
-        console.error("Error fetching restaurants:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+      console.error("Error fetching restaurants:", error);
+      res.status(500).json({ error: "Internal Server Error" });
     }
-});
+  });
+  
+
+
 
 // ✅ Delete from both restaurantRegisters & restaurantCredentials
 router.delete("/delete/:id/:email", async (req, res) => {

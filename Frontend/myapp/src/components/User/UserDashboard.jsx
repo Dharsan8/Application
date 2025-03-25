@@ -1,13 +1,6 @@
 import React, { useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import {
-    FaShoppingCart,
-    FaBox,
-    FaUserCircle,
-    FaSignOutAlt,
-    FaSearch,
-    FaPlus
-} from "react-icons/fa";
+import { FaShoppingCart, FaBox, FaUserCircle, FaSignOutAlt, FaSearch } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 const UserDashboard = () => {
@@ -15,6 +8,8 @@ const UserDashboard = () => {
     const navigate = useNavigate();
     const [searchQuery, setSearchQuery] = useState("");
     const [foodItems, setFoodItems] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -22,24 +17,29 @@ const UserDashboard = () => {
     };
 
     const handleSearch = async () => {
+        if (!searchQuery.trim()) {
+            setError("Please enter a search query.");
+            setFoodItems([]); 
+            return;
+        }
+
+        setLoading(true);
+        setError("");
+        setFoodItems([]);
+
         try {
             const response = await fetch(`http://localhost:3000/search?query=${searchQuery}`);
             if (!response.ok) {
-                throw new Error("Failed to fetch food items");
+                throw new Error("Failed to fetch restaurants");
             }
             const data = await response.json();
-    
-            // Filter only available items
-            const availableItems = data.filter(item => item.availability.toLowerCase() === "available");
-    
-            setFoodItems(availableItems);
+            setFoodItems(data);
         } catch (error) {
             console.error("Error fetching search results:", error);
+            setError("Error fetching search results. Please try again.");
+        } finally {
+            setLoading(false);
         }
-    };
-    const handleAddToCart = (item) => {
-        alert(`Added ${item.name} to cart!`);
-        // You can implement logic to add this item to the cart in the backend
     };
 
     return (
@@ -101,65 +101,37 @@ const UserDashboard = () => {
                         <span>Search</span>
                     </button>
                 </div>
+
+                {error && <p className="text-red-500 mt-2">{error}</p>}
             </div>
 
             {/* Display Search Results */}
             <div className="mt-10 px-6">
-                {foodItems.length > 0 ? (
+                {loading ? (
+                    <p className="text-center text-gray-600 text-lg">Loading...</p>
+                ) : foodItems.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {foodItems.map((item) => (
-                            <motion.div
-                                key={item._id}
-                                className="bg-white rounded-xl shadow-lg p-4 transition-transform transform hover:scale-105 hover:shadow-xl"
-                                whileHover={{ scale: 1.05 }}
+                        {foodItems.map((restaurant) => (
+                            <motion.div 
+                                key={restaurant._id} 
+                                className="relative bg-white rounded-lg shadow-lg overflow-hidden transition-transform hover:scale-105"
                             >
-                                {/* Food Image */}
-                                <div className="relative">
-                                    <img
-                                        src={`http://localhost:3000${item.image}`}
-                                        alt={item.name}
-                                        className="w-full h-56 object-cover rounded-md"
-                                    />
-                                    <span
-                                        className={`absolute top-2 right-2 px-3 py-1 rounded-md text-white font-semibold text-xs ${
-                                            item.vegNonVeg === "Veg" ? "bg-green-600" : "bg-red-600"
-                                        }`}
-                                    >
-                                        {item.vegNonVeg}
-                                    </span>
+                                {/* Restaurant Name Badge */}
+                                <div className="absolute top-2 left-2 bg-[#E68057] text-white px-3 py-1 text-sm rounded-full shadow-md">
+                                    {restaurant.restaurantName}
                                 </div>
 
-                                {/* Food Details */}
-                                <div className="mt-3">
-                                    <h2 className="text-xl font-bold">{item.name}</h2>
-                                    <p className="text-gray-600 mt-1">{item.description}</p>
-                                    <p className="text-green-600 font-semibold text-lg mt-1">
-                                        ₹{item.price}
-                                    </p>
-
-                                    {/* Availability */}
-                                    <span
-                                        className={`inline-block mt-2 px-3 py-1 rounded-lg text-sm text-white ${
-                                            item.availability === "Available" ? "bg-green-500" : "bg-gray-400"
-                                        }`}
-                                    >
-                                        {item.availability}
-                                    </span>
-
-                                    {/* Add to Cart Button */}
-                                    <button
-                                        onClick={() => handleAddToCart(item)}
-                                        className="mt-4 w-full bg-[#E68057] text-white py-2 rounded-lg flex items-center justify-center space-x-2 hover:bg-[#c95e3e] transition"
-                                    >
-                                        <FaPlus />
-                                        <span>Add to Cart</span>
-                                    </button>
-                                </div>
+                                {/* Restaurant Image */}
+                                <img
+                                    src={`http://localhost:3000${restaurant.restaurantImage}`}
+                                    alt={restaurant.restaurantName}
+                                    className="w-full h-56 object-cover rounded-lg"
+                                />
                             </motion.div>
                         ))}
                     </div>
                 ) : (
-                    <p className="text-center text-gray-600 text-lg">No food items found. Try a different search.</p>
+                    <p className="text-center text-gray-600 text-lg">No restaurants found. Try a different search.</p>
                 )}
             </div>
         </div>

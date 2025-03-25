@@ -9,6 +9,7 @@ const RestaurantCredentialSchema = new mongoose.Schema({
   phoneNumber: String,
   address: String,
   email: String,
+  restaurantImage: { type: String, default: "/uploads/default-image.jpg" }, // ✅ Added default value
   status: String // "Approved", "Not Approved", "Deleted"
 });
 
