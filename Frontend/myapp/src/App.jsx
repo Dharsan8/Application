@@ -10,6 +10,7 @@ import RestaurantDashboard from "./components/Restaurant//RestaurantDashboard";
 import AddItem from "./components/Restaurant/Add-item";
 import EditItem from "./components/Restaurant/Edit-item";
 import UserDashboard from "./components/User/UserDashboard";
+import ItemPage from "./components/User/ItemPage";
 function App() {
   return (
     <Router>
@@ -25,8 +26,10 @@ function App() {
 
         <Route path="/admin-login" element={<AdminLogin />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} /> {/* ✅ New Route */}
+        <Route path="/user/:username" element={<UserDashboard />} />
+        <Route path="/user-dashboard" element={<UserDashboard />} />
+        <Route path="/restaurant/items" element={<ItemPage />} />
 
-        <Route path="/user/:username" element={<UserDashboard/>} />
       </Routes>
     </Router>
   );

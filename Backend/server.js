@@ -36,7 +36,7 @@ app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/food', foodRoutes); // ✅ Use food routes separately
 app.use("/search", searchRoutes); // ✅ Add this
 
-
+app.use(foodRoutes);
 
 // Port
 const PORT = process.env.PORT || 3000;

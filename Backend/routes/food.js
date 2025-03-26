@@ -110,7 +110,34 @@ router.put("/update/:id", async (req, res) => {
 }
 });
 
+router.get("/:restaurantId", async (req, res) => {
+  try {
+    const foodItems = await FoodItem.find({ restaurantId: req.params.restaurantId });
+    res.json(foodItems);
+  } catch (error) {
+    res.status(500).json({ error: "Failed to fetch food items" });
+  }
+});
 
+router.get("/api/foodItems", async (req, res) => {
+  try {
+    const { location, restaurantName } = req.query;
 
+    if (!location || !restaurantName) {
+      return res.status(400).json({ message: "Missing location or restaurantName" });
+    }
+
+    const foodItems = await FoodItem.find({ location, restaurantName });
+
+    if (!foodItems.length) {
+      return res.status(404).json({ message: "No food items found" });
+    }
+
+    res.json(foodItems);
+  } catch (error) {
+    console.error("Error fetching food items:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
 
 module.exports = router;
