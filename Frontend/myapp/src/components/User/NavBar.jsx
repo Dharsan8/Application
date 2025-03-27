@@ -1,9 +1,9 @@
-import React from "react";
+import React, {useState, useEffect}from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { FaShoppingCart, FaBox, FaUserCircle, FaSignOutAlt } from "react-icons/fa";
+import { FaShoppingCart, FaBox, FaUserCircle, FaSignOutAlt, FaSearch } from "react-icons/fa";
 import { motion } from "framer-motion";
 
-const Navbar = () => {
+const Navbar = ({ searchQuery, setSearchQuery }) => {
     const { username } = useParams();
     const navigate = useNavigate();
 
@@ -12,8 +12,10 @@ const Navbar = () => {
         navigate("/login");
     };
 
+
+
     return (
-        <nav className="bg-[#8A4F7D] text-white p-4 flex justify-between items-center shadow-md">
+        <nav className="bg-[#8A4F7D] text-white backdrop-blur-md shadow-lg p-2 flex justify-between items-center fixed top-0 w-full z-50">
             <motion.h1
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -22,31 +24,56 @@ const Navbar = () => {
             >
                 Foodie
             </motion.h1>
-
-            <div className="flex items-center space-x-6">
-                <div className="flex items-center space-x-2">
-                    <FaUserCircle className="text-2xl" />
-                    <span>{username}</span>
-                </div>
-
-                <Link to="/cart" className="flex items-center space-x-2">
-                    <FaShoppingCart className="text-xl" />
-                    <span>Cart</span>
-                </Link>
-
-                <Link to="/order-history" className="flex items-center space-x-2">
-                    <FaBox className="text-xl" />
-                    <span>My Orders</span>
-                </Link>
-
-                <button
-                    onClick={handleLogout}
-                    className="flex items-center space-x-2 bg-red-500 px-4 py-2 rounded hover:bg-red-600 transition"
-                >
-                    <FaSignOutAlt />
-                    <span>Logout</span>
-                </button>
+            
+            {/* Search Bar */}
+            <div className="relative flex items-center w-full max-w-xs">
+                <input
+                    type="text"
+                    placeholder="Search..."
+                    className="w-full px-3 py-1 border border-white/50 rounded-full bg-transparent text-white placeholder-white focus:outline-none focus:ring-2 focus:ring-white/70 transition-all"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <FaSearch className="absolute right-3 text-white text-lg cursor-pointer opacity-80" />
             </div>
+
+    {/* Navigation Icons */}
+    <div className="flex items-center space-x-5">
+        {/* Profile */}
+        <div className="group flex flex-col items-center cursor-pointer">
+            <FaUserCircle className="text-xl text-white transition-transform group-hover:scale-110 opacity-90" />
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-white mt-1">
+                {username}
+            </span>
+        </div>
+
+        {/* Cart */}
+        <Link to="/cart" className="group flex flex-col items-center">
+            <FaShoppingCart className="text-lg text-white transition-transform group-hover:scale-110 opacity-90" />
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-white mt-1">
+                Cart
+            </span>
+        </Link>
+
+        {/* Orders */}
+        <Link to="/order-history" className="group flex flex-col items-center">
+            <FaBox className="text-lg text-white transition-transform group-hover:scale-110 opacity-90" />
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-white mt-1">
+                Orders
+            </span>
+        </Link>
+
+        {/* Logout */}
+        <button
+            onClick={handleLogout}
+            className="group flex flex-col items-center"
+        >
+            <FaSignOutAlt className="text-lg text-red-400 transition-transform group-hover:scale-110 opacity-90" />
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-red-400 mt-1">
+                Logout
+            </span>
+        </button>
+    </div>
         </nav>
     );
 };

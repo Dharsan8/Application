@@ -8,6 +8,8 @@ const restaurantRoutes = require("./routes/restaurantreg");
 const foodRoutes = require("./routes/food"); // ✅ Import food routes
 const path = require("path");
 const searchRoutes = require("./routes/search"); // Import search route
+const restaurantFind = require("./routes/restaurantFind");
+const foodItems = require("./routes/foodItems")
 
 const app = express();
 app.use(express.json());
@@ -35,6 +37,8 @@ app.get('/api/protected', authMiddleware, (req, res) => {
 app.use('/api/restaurants', restaurantRoutes);
 app.use('/api/food', foodRoutes); // ✅ Use food routes separately
 app.use("/search", searchRoutes); // ✅ Add this
+app.use("/api", restaurantFind);
+app.use("/api/food",foodItems);
 
 app.use(foodRoutes);
 
