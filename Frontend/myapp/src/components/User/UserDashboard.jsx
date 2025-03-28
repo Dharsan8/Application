@@ -55,7 +55,10 @@ const handleRestaurantClick = (restaurant) => {
     const id = restaurant.restaurantId || restaurant.restaurantID
 
     navigate(`/user/${username}/${restaurant.restaurantName}`, {
-        state: { restaurantId: id },
+        state: { 
+            restaurantId: id,
+            restaurantName: restaurant.restaurantName  // Pass the name directly here
+        },
     });
 };
 
