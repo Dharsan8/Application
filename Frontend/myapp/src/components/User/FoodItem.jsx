@@ -94,14 +94,61 @@ const FoodItem = () => {
         setShowPayment(true);
     };
     
-    const handleSubmitPayment = () => {
-        if (selectedMethod) {
-            alert(`Payment method selected: ${selectedMethod}`);
-            // You can proceed with your payment process here
-        } else {
-            alert("Please select a payment method.");
+    const handleSubmitPayment = async () => {
+        if (!selectedMethod) {
+          alert("Please select a payment method.");
+          return;
         }
-    };
+      
+        try {
+          const orderData = {
+            customer: {
+              name,
+              location: currentLocation,
+              phone,
+              username
+            },
+            restaurant: {
+              id: restaurantId,
+              name: restaurantName
+            },
+            items: cart.map(item => ({
+              foodId: item._id,
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price,
+              discountPrice: item.discount > 0 ? item.discountPrice : undefined,
+              image: item.image
+            })),
+            paymentMethod: selectedMethod,
+            subtotal: parseFloat(calculateTotal()),
+            deliveryAddress: currentLocation,
+            specialInstructions: ""
+          };
+      
+          const response = await fetch("http://localhost:3000/api/orders/create", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(orderData)
+          });
+      
+          if (!response.ok) {
+            throw new Error("Failed to place order");
+          }
+      
+          const result = await response.json();
+          alert(`Order placed successfully! Order ID: ${result._id}`);
+          setCart([]);
+          setShowForm(false);
+          setShowPayment(false);
+          setIsDrawerOpen(false);
+        } catch (error) {
+          console.error("Error placing order:", error);
+          alert("Failed to place order. Please try again.");
+        }
+      };
 
 
 
@@ -143,9 +190,7 @@ const FoodItem = () => {
 
             <div className={`flex transition-all duration-500 mt-14`}>
                 {/* Food Items */}
-                <div 
-                    className={`transition-all duration-500 ${isDrawerOpen ? "pr-[25%]" : "w-full"}`}
-                >
+                <div className={`transition-all duration-500 ${isDrawerOpen ? "pr-[25%]" : "w-full"}`}>
                     <div 
                         className="grid gap-10 p-6" 
                         style={{ gridTemplateColumns: isDrawerOpen ? "repeat(4, 1fr)" : "repeat(5, 1fr)" }}
@@ -155,46 +200,100 @@ const FoodItem = () => {
                         ) : error ? (
                             <p>{error}</p>
                         ) : (
-                            foodItems.map((item) => (
-                                <div key={item._id} className="bg-white shadow-md rounded-xl p-3 border border-gray-200 relative transition-transform duration-300 hover:scale-105">
-                                    {item.discount > 0 && (
-                                        <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-lg shadow-md">
-                                            {item.discount}% OFF
-                                        </div>
-                                    )}
-                                    <img
-                                        src={`http://localhost:3000${item.image}`}
-                                        alt={item.name}
-                                        className="w-full h-32 object-cover rounded-lg"
-                                    />
-                                    <h3 className="text-lg font-semibold mt-2 text-gray-800 truncate">{item.name}</h3>
-                                    <p className="text-sm text-gray-500">{item.category}</p>
+                            foodItems.map((item) => {
+                                const isAvailable = item.availability === "Available";
+                                return (
+                                    <div 
+                                        key={item._id} 
+                                        className={`
+                                            bg-white shadow-md rounded-xl p-3 border border-gray-200 relative 
+                                            transition-transform duration-300 
+                                            ${isAvailable ? "hover:scale-105" : ""}
+                                            ${!isAvailable ? "opacity-70" : ""}
+                                        `}
+                                    >
+                                        {/* Out of Stock Overlay */}
+                                        {!isAvailable && (
+                                            <div className="absolute inset-0 bg-white bg-opacity-60 rounded-xl z-10"></div>
+                                        )}
+                                        
+                                        {/* Discount Badge */}
+                                        {item.discount > 0 && (
+                                            <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-lg shadow-md z-20">
+                                                {item.discount}% OFF
+                                            </div>
+                                        )}
+                                        
+                                        {/* Out of Stock Badge */}
+                                        {!isAvailable && (
+                                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded z-20">
+                                                OUT OF STOCK
+                                            </div>
+                                        )}
+                                        
+                                        {/* Food Image */}
+                                        <img
+                                            src={`http://localhost:3000${item.image}`}
+                                            alt={item.name}
+                                            className={`w-full h-32 object-cover rounded-lg ${!isAvailable ? "filter blur-[1px]" : ""}`}
+                                        />
+                                        
+                                        {/* Food Details */}
+                                        <h3 className={`text-lg font-semibold mt-2 truncate ${
+                                            isAvailable ? "text-gray-800" : "text-gray-500"
+                                        }`}>
+                                            {item.name}
+                                        </h3>
+                                        <p className="text-sm text-gray-500">{item.category}</p>
 
-                                    <div className="mt-2 flex justify-between items-center">
-                                        <div className="flex items-center space-x-2">
-                                            {item.discount > 0 ? (
-                                                <>
-                                                    <p className="text-gray-500 line-through text-sm">₹{item.price}</p>
-                                                    <p className="font-semibold text-green-600 text-base">₹{item.discountPrice.toFixed(2)}</p>
-                                                </>
-                                            ) : (
-                                                <p className="font-semibold text-gray-700 text-base">₹{item.price}</p>
-                                            )}
+                                        <div className="mt-2 flex justify-between items-center">
+                                            <div className="flex items-center space-x-2">
+                                                {item.discount > 0 ? (
+                                                    <>
+                                                        <p className="text-gray-500 line-through text-sm">₹{item.price}</p>
+                                                        <p className={`font-semibold text-base ${
+                                                            isAvailable ? "text-green-600" : "text-gray-400"
+                                                        }`}>
+                                                            ₹{item.discountPrice.toFixed(2)}
+                                                        </p>
+                                                    </>
+                                                ) : (
+                                                    <p className={`font-semibold text-base ${
+                                                        isAvailable ? "text-gray-700" : "text-gray-400"
+                                                    }`}>
+                                                        ₹{item.price}
+                                                    </p>
+                                                )}
+                                            </div>
+                                            <p className={`font-semibold text-sm ${
+                                                isAvailable ? "text-green-600" : "text-red-600"
+                                            }`}>
+                                                {item.availability}
+                                            </p>
                                         </div>
-                                        <p className={`font-semibold text-sm ${item.availability === "Available" ? "text-green-600" : "text-red-600"}`}>
-                                            {item.availability}
-                                        </p>
+
+                                        {/* Add to Cart Button */}
+                                        <button 
+                                            onClick={() => isAvailable && addToCart(item)} 
+                                            className={`
+                                                w-1/2 py-1 rounded-[10px] text-white shadow-lg 
+                                                transition-all duration-300 mt-2
+                                                text-sm font-semibold tracking-wide
+                                                ${isAvailable 
+                                                    ? "bg-red-400 hover:bg-red-500 shadow-red-300/50 hover:shadow-red-400/70 cursor-pointer" 
+                                                    : "bg-gray-400 cursor-not-allowed"}
+                                            `}
+                                            disabled={!isAvailable}
+                                            aria-disabled={!isAvailable}
+                                        >
+                                            {isAvailable ? "Add to Cart" : "Unavailable"}
+                                        </button>
                                     </div>
-
-                                    {/* Add to Cart Button */}
-                                    <button onClick={() => addToCart(item)} className="w-1/2 py-1 rounded-[10px] bg-red-400 text-white hover:bg-red-500 shadow-lg shadow-red-300/50 hover:shadow-red-400/70 transition-all duration-300 backdrop-blur-sm text-sm font-semibold tracking-wide">
-                                        Add to Cart
-                                     </button>
-                                </div>
-                            ))
+                                );
+                            })
                         )}
                     </div>
-                </div>
+                </div>     
 
                 {/* Cart Drawer */}
                 <div className={`fixed top-14 right-0 h-[calc(100vh-56px)] bg-white shadow-lg border-l transition-all duration-500 ${isDrawerOpen ? "w-1/4" : "w-0 overflow-hidden"}`}>

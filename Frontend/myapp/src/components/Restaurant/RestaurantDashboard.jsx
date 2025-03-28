@@ -10,11 +10,13 @@ import {
   FaCheck,
   FaTimes,
   FaEye,
+  FaClipboardList, // Add this import
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import AddItem from "./Add-item";
 import Feedback from "./Feedback";
+import Orders from "./Orders";
 
 export default function RestaurantDashboard() {
   const [restaurant, setRestaurant] = useState(null);
@@ -176,6 +178,19 @@ export default function RestaurantDashboard() {
               <FaCommentDots className="text-xl" />
               <span>Feedback</span>
             </button>
+            
+  <button
+    className={`flex items-center space-x-3 w-full py-3 px-4 rounded-md transition ${
+      activePage === "orders"
+        ? "bg-[#6B3A63]"
+        : "hover:bg-[#6B3A63]"
+    }`}
+    onClick={() => setActivePage("orders")}
+  >
+    <FaClipboardList className="text-xl" />
+    <span>Orders</span>
+  </button>
+
           </nav>
         )}
       </div>
@@ -255,6 +270,7 @@ export default function RestaurantDashboard() {
             <AddItem onFoodItemAdded={refreshFoodItems} />
           )}
           {activePage === "feedback" && <Feedback />}
+          {activePage === "orders" && <Orders />}
         </div>
       </div>
     </div>

@@ -12,6 +12,8 @@ import EditItem from "./components/Restaurant/Edit-item";
 import UserDashboard from "./components/User/UserDashboard";
 import ItemPage from "./components/User/ItemPage";
 import FoodItem from "./components/User/FoodItem";
+import Orders from "./components/Restaurant/Orders";
+
 function App() {
   return (
     <Router>
@@ -31,6 +33,7 @@ function App() {
         {/* <Route path="/user-dashboard" element={<UserDashboard />} /> */}
         <Route path="/restaurant/items" element={<ItemPage />} />
         <Route path ="/user/:username/:restaurantname" element={<FoodItem/>} />
+        <Route path="/restaurant-dashboard/orders" element={<Orders />} />
       </Routes>
     </Router>
   );
