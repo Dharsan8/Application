@@ -12,34 +12,40 @@ const router = express.Router();
 router.post("/admin/login", async (req, res) => {
   const { email, password } = req.body;
 
-  if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASS) {
-    const token = jwt.sign({ role: "admin" }, process.env.JWT_KEY, { expiresIn: "1h" });
-
-    return res.json({ message: "Admin login successful", token });
-  }
-
-  res.status(401).json({ message: "Invalid admin credentials" });
-});
-
-// ✅ Middleware: Admin Authentication Check
-const verifyAdmin = (req, res, next) => {
-  const token = req.header("Authorization");
-  
-  if (!token) {
-    return res.status(403).json({ message: "Access denied. No token provided." });
-  }
-
   try {
-    const decoded = jwt.verify(token.replace("Bearer ", ""), process.env.JWT_KEY);
-    if (decoded.role !== "admin") {
-      return res.status(403).json({ message: "Access denied. Not an admin." });
-    }
-    next();
-  } catch (error) {
-    res.status(401).json({ message: "Invalid token." });
-  }
-};
+    if (email === process.env.ADMIN_EMAIL && password === process.env.ADMIN_PASS) {
+      const token = jwt.sign(
+        { 
+          email: process.env.ADMIN_EMAIL,
+          role: "admin" 
+        }, 
+        process.env.JWT_KEY, 
+        { expiresIn: "1h" }
+      );
 
+      return res.status(200).json({ 
+        success: true,
+        message: "Admin login successful", 
+        token,
+        admin: {
+          email: process.env.ADMIN_EMAIL,
+          role: "admin"
+        }
+      });
+    }
+
+    res.status(401).json({ 
+      success: false,
+      message: "Invalid admin credentials" 
+    });
+  } catch (error) {
+    console.error("Admin login error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error during login"
+    });
+  }
+});
 
 
 module.exports = router;

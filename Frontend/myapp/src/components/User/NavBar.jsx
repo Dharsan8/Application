@@ -1,7 +1,7 @@
 import React, {useState, useEffect}from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { FaShoppingCart, FaBox, FaUserCircle, FaSignOutAlt, FaSearch } from "react-icons/fa";
 import { motion } from "framer-motion";
+import { FaShoppingCart, FaBox, FaUserCircle, FaSignOutAlt, FaSearch, FaShippingFast } from "react-icons/fa";
 
 const Navbar = ({ searchQuery, setSearchQuery }) => {
     const { username } = useParams();
@@ -56,12 +56,20 @@ const Navbar = ({ searchQuery, setSearchQuery }) => {
         </Link>
 
         {/* Orders */}
-        <Link to="/order-history" className="group flex flex-col items-center">
-            <FaBox className="text-lg text-white transition-transform group-hover:scale-110 opacity-90" />
-            <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-white mt-1">
-                Orders
-            </span>
-        </Link>
+       {/* Orders */}
+
+       
+       <Link 
+  to={`/order-history/${username}`} 
+  className="group flex flex-col items-center"
+>
+  <FaBox className="text-lg text-white transition-transform group-hover:scale-110 opacity-90" />
+  <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-white mt-1">
+    Order History
+  </span>
+</Link>
+
+{/* Tracking */}
 
         {/* Logout */}
         <button

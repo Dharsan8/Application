@@ -11,6 +11,8 @@ const searchRoutes = require("./routes/search"); // Import search route
 const restaurantFind = require("./routes/restaurantFind");
 const foodItems = require("./routes/foodItems")
 const orderRoutes = require("./routes/Order");
+const deliveryRoutes = require("./routes/delivery");
+const orderRouting = require("./routes/orderRoutes");
 
 const app = express();
 app.use(express.json());
@@ -41,7 +43,8 @@ app.use("/search", searchRoutes); // ✅ Add this
 app.use("/api", restaurantFind);
 app.use("/api/food",foodItems);
 app.use("/api/orders", orderRoutes);
-
+app.use("/api/delivery", deliveryRoutes);
+app.use("/api/orders", orderRouting);
 app.use(foodRoutes);
 
 // Port

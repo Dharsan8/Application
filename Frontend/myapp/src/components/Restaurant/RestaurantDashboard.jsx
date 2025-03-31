@@ -408,8 +408,3 @@ const FoodCard = ({ item, onDelete, onUpdate }) => {
     </div>
   );
 };
-
-
-
-
-

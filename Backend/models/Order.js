@@ -21,15 +21,34 @@ const OrderSchema = new mongoose.Schema({
   }],
   subtotal: { type: Number, required: true },
   paymentMethod: { type: String, required: true },
-  status: { 
-    type: String, 
-    required: true,
-    enum: ['Pending', 'Preparing', 'Ready', 'Delivered', 'Cancelled'],
-    default: 'Pending'
+  status: {
+    type: String,
+    enum: ["Pending", "Preparing", "Ready", "Out for Delivery", "Delivered", "Cancelled"],
+    default: "Pending",
   },
+  statusHistory: [{
+    status: { type: String, required: true },
+    timestamp: { type: Date, default: Date.now },
+    message: { type: String }
+  }],
   orderDate: { type: Date, default: Date.now },
-  deliveryAddress: { type: String },
-  specialInstructions: { type: String }
+  deliveryAddress: { type: String, required: true },
+  specialInstructions: { type: String },
+  deliveryPersonId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Delivery",
+  }
+});
+
+// Add status to history when order is created
+OrderSchema.pre('save', function(next) {
+  if (this.isNew) {
+    this.statusHistory = [{
+      status: 'Pending',
+      message: 'Order has been placed and is awaiting confirmation'
+    }];
+  }
+  next();
 });
 
 module.exports = mongoose.model("Order", OrderSchema);

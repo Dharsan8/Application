@@ -13,6 +13,10 @@ import UserDashboard from "./components/User/UserDashboard";
 import ItemPage from "./components/User/ItemPage";
 import FoodItem from "./components/User/FoodItem";
 import Orders from "./components/Restaurant/Orders";
+import DeliveryRegister from "./components/Delivery/DeliveryRegister";
+import DeliveryLogin from "./components/Delivery/DeliveryLogin";
+import DeliveryDashboard from "./components/Delivery/DeliveryDashboard";
+import OrderHistory from "./components/User/OrderHistory";
 
 function App() {
   return (
@@ -34,6 +38,10 @@ function App() {
         <Route path="/restaurant/items" element={<ItemPage />} />
         <Route path ="/user/:username/:restaurantname" element={<FoodItem/>} />
         <Route path="/restaurant-dashboard/orders" element={<Orders />} />
+        <Route path="/order-history/:username" element={<OrderHistory />} />
+        <Route path="/delivery-register" element={<DeliveryRegister />} />
+<Route path="/delivery-login" element={<DeliveryLogin />} />
+<Route path="/delivery-dashboard" element={<DeliveryDashboard />} />
       </Routes>
     </Router>
   );

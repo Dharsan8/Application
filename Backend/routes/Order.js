@@ -1,3 +1,4 @@
+
 const express = require("express");
 const router = express.Router();
 const Order = require("../models/Order");
@@ -97,6 +98,47 @@ router.get("/customer/:username", async (req, res) => {
     res.json(orders);
   } catch (error) {
     res.status(500).json({ error: "Failed to fetch orders" });
+  }
+});
+
+// 
+// Add this to your order routes
+// Get orders assigned to a delivery person
+router.get("/delivery/:deliveryPersonId", async (req, res) => {
+  try {
+    const orders = await Order.find({ 
+      deliveryPersonId: req.params.deliveryPersonId,
+      status: { $in: ["Ready", "Out for Delivery", "Delivered"] }
+    });
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch orders", error: error.message });
+  }
+});
+
+// Update order status (modify your existing route)
+router.put("/:id/status", async (req, res) => {
+  try {
+    const { status, deliveryPersonId } = req.body;
+    const updateData = { status };
+    
+    if (deliveryPersonId) {
+      updateData.deliveryPersonId = deliveryPersonId;
+    }
+
+    const order = await Order.findByIdAndUpdate(
+      req.params.id,
+      updateData,
+      { new: true }
+    ).populate("deliveryPersonId", "name phone");
+
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json({ message: "Order status updated", order });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update order status", error: error.message });
   }
 });
 
