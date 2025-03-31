@@ -5,7 +5,10 @@ const Order = require("../models/Order");
 // Create a new order
 router.post("/create", async (req, res) => {
   try {
-    const order = new Order(req.body);
+    const order = new Order({
+      ...req.body,
+      createdAt: new Date() // Add creation timestamp
+    });
     await order.save();
     res.status(201).json(order);
   } catch (error) {
@@ -60,4 +63,47 @@ router.patch("/:id/status", async (req, res) => {
   }
 });
 
+// Cancel order (no time limit)
+router.patch("/:id/cancel", async (req, res) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    
+    // Only check if order is already cancelled or delivered
+    if (order.status === "Cancelled") {
+      return res.status(400).json({ 
+        message: "Order is already cancelled" 
+      });
+    }
+    
+    if (order.status === "Delivered") {
+      return res.status(400).json({ 
+        message: "Delivered orders cannot be cancelled" 
+      });
+    }
+    
+    // Update order status to cancelled
+    const cancelledOrder = await Order.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: { status: "Cancelled" },
+        $push: {
+          statusHistory: {
+            status: "Cancelled",
+            message: "Order cancelled by customer",
+            timestamp: new Date()
+          }
+        }
+      },
+      { new: true }
+    );
+    
+    res.json(cancelledOrder);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 module.exports = router;

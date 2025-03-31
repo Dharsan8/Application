@@ -7,6 +7,7 @@ const OrderHistory = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [cancelling, setCancelling] = useState(null);
 
   useEffect(() => {
     const fetchOrderHistory = async () => {
@@ -37,7 +38,42 @@ const OrderHistory = () => {
     Cancelled: <FaTimes className="text-red-500" />,
   };
 
-  const getStatusIndex = (status) => statusSteps.indexOf(status);
+  const getStatusIndex = (status) => {
+    if (status === "Cancelled") return -1;
+    return statusSteps.indexOf(status);
+  };
+
+  const handleCancelOrder = async (orderId) => {
+    try {
+      setCancelling(orderId);
+      const response = await fetch(`http://localhost:3000/api/orders/${orderId}/cancel`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message);
+      }
+      
+      const updatedOrder = await response.json();
+      
+      setOrders(orders.map(order => 
+        order._id === orderId ? updatedOrder : order
+      ));
+      
+    } catch (error) {
+      alert(error.message);
+    } finally {
+      setCancelling(null);
+    }
+  };
+
+  const canCancelOrder = (order) => {
+    return order.status !== "Cancelled" && order.status !== "Delivered";
+  };
 
   if (loading) return <div className="text-center py-8">Loading order history...</div>;
   if (error) return <div className="text-center py-8 text-red-500">{error}</div>;
@@ -64,7 +100,11 @@ const OrderHistory = () => {
                       {new Date(order.orderDate).toLocaleDateString()} • {order.restaurant.name}
                     </p>
                   </div>
-                  <span className="px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-800">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    order.status === "Cancelled" ? "bg-red-100 text-red-800" :
+                    order.status === "Delivered" ? "bg-green-100 text-green-800" :
+                    "bg-blue-100 text-blue-800"
+                  }`}>
                     {order.status}
                   </span>
                 </div>
@@ -94,7 +134,7 @@ const OrderHistory = () => {
                 </div>
               </div>
 
-              {/* 🚀 Status Timeline */}
+              {/* Status Timeline */}
               <div className="p-6 bg-gray-50">
                 <h3 className="text-lg font-medium text-gray-800 mb-4">Order Progress</h3>
                 <div className="relative flex justify-between items-center w-full px-4">
@@ -103,17 +143,25 @@ const OrderHistory = () => {
                       <div
                         className={`w-8 h-8 flex items-center justify-center rounded-full border-2 ${
                           getStatusIndex(order.status) >= index ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"
+                        } ${
+                          order.status === "Cancelled" ? "border-red-500" : ""
                         }`}
                       >
                         {statusIcons[step]}
                       </div>
-                      <p className={`text-sm mt-2 ${getStatusIndex(order.status) >= index ? "text-green-600 font-medium" : "text-gray-500"}`}>
+                      <p className={`text-sm mt-2 ${
+                        getStatusIndex(order.status) >= index ? 
+                        (order.status === "Cancelled" ? "text-red-600" : "text-green-600 font-medium") : 
+                        "text-gray-500"
+                      }`}>
                         {step}
                       </p>
                       {index < statusSteps.length - 1 && (
                         <div
                           className={`absolute top-4 left-10 w-20 h-1 ${
-                            getStatusIndex(order.status) > index ? "bg-green-500" : "bg-gray-300"
+                            getStatusIndex(order.status) > index ? 
+                            (order.status === "Cancelled" ? "bg-red-500" : "bg-green-500") : 
+                            "bg-gray-300"
                           }`}
                         ></div>
                       )}
@@ -124,9 +172,26 @@ const OrderHistory = () => {
 
               <div className="p-6 bg-gray-50 flex justify-between items-center">
                 <p className="text-gray-700">Total: ₹{order.subtotal.toFixed(2)}</p>
-                <button className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition">
-                  Cancel Order
-                </button>
+                {canCancelOrder(order) ? (
+                  <button 
+                    onClick={() => handleCancelOrder(order._id)}
+                    disabled={cancelling === order._id}
+                    className={`px-4 py-2 rounded-md transition ${
+                      cancelling === order._id ? 
+                      "bg-gray-400 text-white cursor-not-allowed" :
+                      "bg-red-500 text-white hover:bg-red-600"
+                    }`}
+                  >
+                    {cancelling === order._id ? "Cancelling..." : "Cancel Order"}
+                  </button>
+                ) : (
+                  <button 
+                    disabled
+                    className="px-4 py-2 rounded-md bg-gray-300 text-gray-600 cursor-not-allowed"
+                  >
+                    {order.status === "Cancelled" ? "Order Cancelled" : "Already Delivered"}
+                  </button>
+                )}
               </div>
             </div>
           ))}

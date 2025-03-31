@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaMotorcycle, FaCheck, FaTimes, FaSignOutAlt, FaUser } from "react-icons/fa";
+import { FaMotorcycle, FaCheck, FaTimes, FaSignOutAlt, FaUser, FaMapMarkerAlt } from "react-icons/fa";
 
 const DeliveryDashboard = () => {
   const [deliveryPerson, setDeliveryPerson] = useState(null);
@@ -23,7 +23,9 @@ const DeliveryDashboard = () => {
         setDeliveryPerson(parsedData);
 
         // Fetch orders assigned to this delivery person
-        const response = await axios.get(`http://localhost:3000/api/orders/delivery/${parsedData._id}`);
+        const response = await axios.get(
+          `http://localhost:3000/api/orders/delivery/${parsedData._id}`
+        );
         setOrders(response.data);
       } catch (err) {
         setError("Failed to fetch data");
@@ -41,9 +43,40 @@ const DeliveryDashboard = () => {
     navigate("/delivery-login");
   };
 
+  const acceptOrder = async (orderId) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3000/api/orders/${orderId}/accept-delivery`,
+        { deliveryPersonId: deliveryPerson._id }
+      );
+      
+      setOrders(orders.map(order => 
+        order._id === orderId ? response.data : order
+      ));
+    } catch (err) {
+      console.error("Failed to accept order:", err);
+      alert("Failed to accept order");
+    }
+  };
+
+  const rejectOrder = async (orderId) => {
+    try {
+      const response = await axios.patch(
+        `http://localhost:3000/api/orders/${orderId}/reject-delivery`
+      );
+      
+      setOrders(orders.map(order => 
+        order._id === orderId ? response.data : order
+      ));
+    } catch (err) {
+      console.error("Failed to reject order:", err);
+      alert("Failed to reject order");
+    }
+  };
+
   const updateOrderStatus = async (orderId, status) => {
     try {
-      await axios.put(`http://localhost:3000/api/orders/${orderId}/status`, {
+      await axios.patch(`http://localhost:3000/api/orders/${orderId}/status`, {
         status,
         deliveryPersonId: deliveryPerson._id
       });
@@ -103,10 +136,10 @@ const DeliveryDashboard = () => {
           </div>
         </div>
 
-        <h2 className="text-xl font-semibold mb-4">Assigned Orders</h2>
+        <h2 className="text-xl font-semibold mb-4">Available Orders</h2>
         
         {orders.length === 0 ? (
-          <p className="text-gray-500">No orders assigned to you yet.</p>
+          <p className="text-gray-500">No orders available at the moment.</p>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {orders.map(order => (
@@ -124,7 +157,7 @@ const DeliveryDashboard = () => {
                 </div>
                 
                 <p className="text-sm text-gray-600 mb-2">
-                  From: {order.restaurantName}
+                  From: {order.restaurant.name}
                 </p>
                 
                 <p className="text-sm mb-2">
@@ -132,7 +165,8 @@ const DeliveryDashboard = () => {
                 </p>
                 
                 <p className="text-sm mb-2">
-                  <span className="font-medium">Address:</span> {order.deliveryAddress}
+                  <FaMapMarkerAlt className="inline mr-1" />
+                  {order.deliveryAddress}
                 </p>
                 
                 <p className="text-sm mb-3">
@@ -140,21 +174,29 @@ const DeliveryDashboard = () => {
                 </p>
                 
                 <div className="flex space-x-2">
-                  {order.status === "Ready" && (
-                    <button
-                      onClick={() => updateOrderStatus(order._id, "Out for Delivery")}
-                      className="bg-blue-500 text-white px-3 py-1 rounded text-sm hover:bg-blue-600"
-                    >
-                      Accept Order
-                    </button>
+                  {order.status === "Ready" && !order.deliveryPersonId && (
+                    <>
+                      <button
+                        onClick={() => acceptOrder(order._id)}
+                        className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 flex-1"
+                      >
+                        Accept Order
+                      </button>
+                      <button
+                        onClick={() => rejectOrder(order._id)}
+                        className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 flex-1"
+                      >
+                        Reject
+                      </button>
+                    </>
                   )}
                   
-                  {order.status === "Out for Delivery" && (
+                  {order.deliveryPersonId === deliveryPerson._id && order.status === "Out for Delivery" && (
                     <button
                       onClick={() => updateOrderStatus(order._id, "Delivered")}
-                      className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600"
+                      className="bg-purple-500 text-white px-3 py-1 rounded text-sm hover:bg-purple-600 w-full"
                     >
-                      Mark Delivered
+                      Mark as Delivered
                     </button>
                   )}
                 </div>

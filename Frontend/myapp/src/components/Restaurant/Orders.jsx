@@ -10,32 +10,36 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const restaurantData = JSON.parse(localStorage.getItem("restaurantData"));
-        if (!restaurantData || !restaurantData.restaurantID) {
-          throw new Error("Restaurant data not found");
-        }
-
-        const response = await axios.get(
-          `http://localhost:3000/api/orders/restaurant/${restaurantData.restaurantID}`
-        );
-        setOrders(response.data);
-      } catch (err) {
-        setError("Failed to fetch orders");
-        console.error(err);
-      } finally {
-        setLoading(false);
+// In your Orders.js component, add debugging:
+useEffect(() => {
+  const fetchOrders = async () => {
+    try {
+      const restaurantData = JSON.parse(localStorage.getItem("restaurantData"));
+      console.log("Restaurant Data from localStorage:", restaurantData); // Debug log
+      
+      if (!restaurantData || !restaurantData.restaurantID) {
+        throw new Error("Restaurant data not found");
       }
-    };
 
-    fetchOrders();
-  }, []);
+      const response = await axios.get(
+        `http://localhost:3000/api/orders/restaurant/${restaurantData.restaurantID}`
+      );
+      console.log("API Response:", response.data); // Debug log
+      setOrders(response.data);
+    } catch (err) {
+      console.error("Error details:", err); // More detailed error logging
+      setError("Failed to fetch orders");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchOrders();
+}, []);
 
   const updateStatus = async (orderId, newStatus) => {
     try {
-      await axios.put(`http://localhost:3000/api/orders/${orderId}/status`, {
+      await axios.patch(`http://localhost:3000/api/orders/${orderId}/status`, {
         status: newStatus
       });
       setOrders(orders.map(order => 
@@ -54,7 +58,8 @@ const Orders = () => {
       case "Pending": return <FaHourglassHalf className="text-yellow-500" />;
       case "Preparing": return <FaUtensils className="text-blue-500" />;
       case "Ready": return <FaCheck className="text-green-500" />;
-      case "Delivered": return <FaTruck className="text-purple-500" />;
+      case "Out for Delivery": return <FaTruck className="text-purple-500" />;
+      case "Delivered": return <FaTruck className="text-green-700" />;
       case "Cancelled": return <FaTimes className="text-red-500" />;
       default: return null;
     }
@@ -187,20 +192,12 @@ const Orders = () => {
                     Mark as Ready
                   </button>
                 )}
-                {selectedOrder.status !== 'Delivered' && selectedOrder.status !== 'Cancelled' && (
+                {selectedOrder.status === 'Cancelled' && (
                   <button
-                    onClick={() => updateStatus(selectedOrder._id, 'Delivered')}
-                    className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition"
+                    disabled
+                    className="bg-gray-500 text-white px-4 py-2 rounded-lg cursor-not-allowed"
                   >
-                    Mark as Delivered
-                  </button>
-                )}
-                {selectedOrder.status !== 'Cancelled' && (
-                  <button
-                    onClick={() => updateStatus(selectedOrder._id, 'Cancelled')}
-                    className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition"
-                  >
-                    Cancel Order
+                    Order Cancelled
                   </button>
                 )}
               </div>
