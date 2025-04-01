@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Order = require("../models/Order");
+const Delivery = require("../models/Delivery"); // Make sure to import Delivery model
 
 // Create a new order
 router.post("/create", async (req, res) => {
@@ -18,19 +19,14 @@ router.post("/create", async (req, res) => {
 });
 
 // Get orders for restaurant
-// In your orders.js router:
 router.get("/restaurant/:restaurantId", async (req, res) => {
   try {
-    console.log("Fetching orders for restaurant:", req.params.restaurantId); // Debug log
-    
     const orders = await Order.find({ 
       $or: [
         { "restaurant._id": req.params.restaurantId },
-        { "restaurant.id": req.params.restaurantId } // Alternative field name
+        { "restaurant.id": req.params.restaurantId }
       ]
     }).sort({ orderDate: -1 });
-    
-    console.log("Found orders:", orders); // Debug log
     
     if (!orders || orders.length === 0) {
       return res.status(404).json({ message: "No orders found for this restaurant" });
@@ -38,23 +34,52 @@ router.get("/restaurant/:restaurantId", async (req, res) => {
     
     res.json(orders);
   } catch (error) {
-    console.error("Error in /restaurant/:id route:", error); // Debug log
     res.status(500).json({ 
       message: "Error fetching orders",
       error: error.message 
     });
   }
 });
-// Get orders for delivery person
+
+// Get orders for delivery person WITH CITY FILTERING
 router.get("/delivery/:deliveryPersonId", async (req, res) => {
   try {
-    const orders = await Order.find({ 
+    const deliveryPerson = await Delivery.findById(req.params.deliveryPersonId);
+    if (!deliveryPerson) {
+      return res.status(404).json({ message: "Delivery person not found" });
+    }
+
+    const orders = await Order.find({
       $or: [
-        { deliveryPersonId: req.params.deliveryPersonId },
-        { status: "Ready" } // Show ready orders that can be accepted
+        { 
+          status: "Ready",
+          $or: [
+            { 
+              "deliveryAddress": { 
+                $regex: new RegExp(deliveryPerson.city, "i") 
+              } 
+            },
+            { 
+              "customer.location": { 
+                $regex: new RegExp(deliveryPerson.city, "i") 
+              } 
+            }
+          ]
+        },
+        { 
+          deliveryPersonId: req.params.deliveryPersonId,
+          status: { $ne: "Delivered" }
+        }
       ]
     }).sort({ orderDate: -1 });
-    res.json(orders);
+
+    // Additional client-side filtering as fallback
+    const filteredOrders = orders.filter(order => {
+      const address = order.deliveryAddress || order.customer.location || "";
+      return address.toLowerCase().includes(deliveryPerson.city.toLowerCase());
+    });
+
+    res.json(filteredOrders);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -84,7 +109,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-// Update order status (used by restaurant and delivery)
+// Update order status
 router.patch("/:id/status", async (req, res) => {
   try {
     const { status, deliveryPersonId, message } = req.body;
@@ -147,9 +172,20 @@ router.patch("/:id/cancel", async (req, res) => {
 // Accept order for delivery
 router.patch("/:id/accept-delivery", async (req, res) => {
   try {
-    const { deliveryPersonId } = req.body;
+    const { deliveryPersonId, deliveryPersonCity } = req.body;
     
-    const order = await Order.findByIdAndUpdate(
+    // Verify the order is in the same city
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    
+    const address = order.deliveryAddress || order.customer.location || "";
+    if (!address.toLowerCase().includes(deliveryPersonCity.toLowerCase())) {
+      return res.status(400).json({ message: "Order is not in your delivery area" });
+    }
+    
+    const updatedOrder = await Order.findByIdAndUpdate(
       req.params.id,
       {
         $set: { 
@@ -167,7 +203,7 @@ router.patch("/:id/accept-delivery", async (req, res) => {
       { new: true }
     );
     
-    res.json(order);
+    res.json(updatedOrder);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -179,9 +215,6 @@ router.patch("/:id/reject-delivery", async (req, res) => {
     const order = await Order.findByIdAndUpdate(
       req.params.id,
       {
-        $set: { 
-          deliveryPersonId: null 
-        },
         $push: {
           statusHistory: {
             status: "Ready",
@@ -197,12 +230,6 @@ router.patch("/:id/reject-delivery", async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
-});
-
-// Temporary test route - remove after debugging
-router.get("/all", async (req, res) => {
-  const orders = await Order.find({});
-  res.json(orders);
 });
 
 module.exports = router;

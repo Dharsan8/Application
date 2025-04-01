@@ -102,4 +102,117 @@ router.put("/:id/status", async (req, res) => {
   }
 });
 
+// In your orders.js router
+router.get("/delivery/:deliveryPersonId", async (req, res) => {
+  try {
+    const deliveryPerson = await Delivery.findById(req.params.deliveryPersonId);
+    if (!deliveryPerson) {
+      return res.status(404).json({ message: "Delivery person not found" });
+    }
+
+    // Find orders that are either:
+    // 1. Ready and match the delivery person's city
+    // 2. Already assigned to this delivery person
+    const orders = await Order.find({
+      $or: [
+        { 
+          status: "Ready",
+          $or: [
+            { "deliveryAddress": { $regex: deliveryPerson.city, $options: "i" } },
+            { "customer.location": { $regex: deliveryPerson.city, $options: "i" } }
+          ]
+        },
+        { 
+          deliveryPersonId: req.params.deliveryPersonId,
+          status: { $in: ["Out for Delivery", "Delivered"] }
+        }
+      ]
+    }).sort({ orderDate: -1 });
+
+    res.json(orders);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Accept delivery endpoint
+router.patch("/:id/accept-delivery", async (req, res) => {
+  try {
+    const { deliveryPersonId, deliveryPersonCity } = req.body;
+    
+    // Verify the order is still available and matches the delivery person's city
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    
+    if (order.status !== "Ready") {
+      return res.status(400).json({ message: "Order is no longer available" });
+    }
+    
+    // Check if order matches delivery person's city
+    const deliveryAddress = order.deliveryAddress || order.customer.location;
+    if (!deliveryAddress.toLowerCase().includes(deliveryPersonCity.toLowerCase())) {
+      return res.status(400).json({ message: "Order is not in your delivery area" });
+    }
+    
+    // Update the order
+    const updatedOrder = await Order.findByIdAndUpdate(
+      req.params.id,
+      {
+        $set: { 
+          status: "Out for Delivery",
+          deliveryPersonId 
+        },
+        $push: {
+          statusHistory: {
+            status: "Out for Delivery",
+            message: `Order accepted by delivery person ${deliveryPersonId}`,
+            timestamp: new Date()
+          }
+        }
+      },
+      { new: true }
+    );
+    
+    res.json(updatedOrder);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Reject delivery endpoint
+router.patch("/:id/reject-delivery", async (req, res) => {
+  try {
+    const { deliveryPersonId } = req.body;
+    
+    // Just confirm the order exists
+    const order = await Order.findById(req.params.id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+    
+    // Add rejection to history but don't change status
+    const updatedOrder = await Order.findByIdAndUpdate(
+      req.params.id,
+      {
+        $push: {
+          statusHistory: {
+            status: order.status,
+            message: `Order rejected by delivery person ${deliveryPersonId}`,
+            timestamp: new Date()
+          }
+        }
+      },
+      { new: true }
+    );
+    
+    res.json(updatedOrder);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
+
 module.exports = router;

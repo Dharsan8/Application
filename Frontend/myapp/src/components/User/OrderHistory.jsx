@@ -43,34 +43,20 @@ const OrderHistory = () => {
     return statusSteps.indexOf(status);
   };
 
-  const handleCancelOrder = async (orderId) => {
-    try {
-      setCancelling(orderId);
-      const response = await fetch(`http://localhost:3000/api/orders/${orderId}/cancel`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+ // Cancel order function
+const handleCancelOrder = async (orderId) => {
+  try {
+    await axios.patch(`http://localhost:3000/api/orders/${orderId}/cancel`);
+    
+    setOrders(orders.map(order => 
+      order._id === orderId ? { ...order, status: "Cancelled" } : order
+    ));
+  } catch (error) {
+    console.error("Failed to cancel order:", error);
+  }
+};
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message);
-      }
       
-      const updatedOrder = await response.json();
-      
-      setOrders(orders.map(order => 
-        order._id === orderId ? updatedOrder : order
-      ));
-      
-    } catch (error) {
-      alert(error.message);
-    } finally {
-      setCancelling(null);
-    }
-  };
-
   const canCancelOrder = (order) => {
     return order.status !== "Cancelled" && order.status !== "Delivered";
   };

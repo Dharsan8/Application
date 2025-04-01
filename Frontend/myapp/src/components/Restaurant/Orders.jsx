@@ -36,21 +36,47 @@ const Orders = () => {
     fetchOrders();
   }, []);
 
-  const updateStatus = async (orderId, newStatus) => {
-    try {
-      await axios.patch(`http://localhost:3000/api/orders/${orderId}/status`, {
-        status: newStatus
-      });
-      setOrders(orders.map(order => 
+// Update status function in Orders.js
+const updateStatus = async (orderId, newStatus) => {
+  try {
+    await axios.patch(`http://localhost:3000/api/orders/${orderId}/status`, {
+      status: newStatus
+    });
+
+    // Optimistically update local state
+    setOrders(prevOrders => 
+      prevOrders.map(order => 
         order._id === orderId ? { ...order, status: newStatus } : order
-      ));
-      if (selectedOrder && selectedOrder._id === orderId) {
-        setSelectedOrder({ ...selectedOrder, status: newStatus });
-      }
-    } catch (err) {
-      console.error("Failed to update status:", err);
+      )
+    );
+
+    // Also update the selected order state if it's the one being changed
+    if (selectedOrder && selectedOrder._id === orderId) {
+      setSelectedOrder(prevOrder => ({
+        ...prevOrder,
+        status: newStatus
+      }));
     }
-  };
+
+  } catch (err) {
+    console.error("Failed to update status:", err);
+  }
+};
+
+
+// Status buttons logic
+const shouldShowButton = (currentStatus, targetStatus) => {
+  const statusFlow = ["Pending", "Preparing", "Ready", "Out for Delivery", "Delivered"];
+  
+  if (currentStatus === "Cancelled" || currentStatus === "Delivered") {
+    return false;
+  }
+  
+  const currentIndex = statusFlow.indexOf(currentStatus);
+  const targetIndex = statusFlow.indexOf(targetStatus);
+  
+  return currentIndex === targetIndex - 1;
+};
 
   const getStatusIcon = (status) => {
     switch (status) {
@@ -64,21 +90,9 @@ const Orders = () => {
     }
   };
 
-  // Helper function to determine if a button should be shown
-  const shouldShowButton = (currentStatus, targetStatus) => {
-    const statusFlow = ["Pending", "Preparing", "Ready", "Out for Delivery", "Delivered"];
-    
-    // Don't show if already cancelled or delivered
-    if (currentStatus === "Cancelled" || currentStatus === "Delivered") {
-      return false;
-    }
     
     // Only show if current status is immediately before target in flow
-    const currentIndex = statusFlow.indexOf(currentStatus);
-    const targetIndex = statusFlow.indexOf(targetStatus);
-    
-    return currentIndex === targetIndex - 1;
-  };
+  
 
   if (loading) return <p>Loading orders...</p>;
   if (error) return <p className="text-red-500">{error}</p>;
