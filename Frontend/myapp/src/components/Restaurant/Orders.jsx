@@ -10,32 +10,31 @@ const Orders = () => {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const navigate = useNavigate();
 
-// In your Orders.js component, add debugging:
-useEffect(() => {
-  const fetchOrders = async () => {
-    try {
-      const restaurantData = JSON.parse(localStorage.getItem("restaurantData"));
-      console.log("Restaurant Data from localStorage:", restaurantData); // Debug log
-      
-      if (!restaurantData || !restaurantData.restaurantID) {
-        throw new Error("Restaurant data not found");
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const restaurantData = JSON.parse(localStorage.getItem("restaurantData"));
+        console.log("Restaurant Data from localStorage:", restaurantData);
+        
+        if (!restaurantData || !restaurantData.restaurantID) {
+          throw new Error("Restaurant data not found");
+        }
+
+        const response = await axios.get(
+          `http://localhost:3000/api/orders/restaurant/${restaurantData.restaurantID}`
+        );
+        console.log("API Response:", response.data);
+        setOrders(response.data);
+      } catch (err) {
+        console.error("Error details:", err);
+        setError("Failed to fetch orders");
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const response = await axios.get(
-        `http://localhost:3000/api/orders/restaurant/${restaurantData.restaurantID}`
-      );
-      console.log("API Response:", response.data); // Debug log
-      setOrders(response.data);
-    } catch (err) {
-      console.error("Error details:", err); // More detailed error logging
-      setError("Failed to fetch orders");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchOrders();
-}, []);
+    fetchOrders();
+  }, []);
 
   const updateStatus = async (orderId, newStatus) => {
     try {
@@ -63,6 +62,22 @@ useEffect(() => {
       case "Cancelled": return <FaTimes className="text-red-500" />;
       default: return null;
     }
+  };
+
+  // Helper function to determine if a button should be shown
+  const shouldShowButton = (currentStatus, targetStatus) => {
+    const statusFlow = ["Pending", "Preparing", "Ready", "Out for Delivery", "Delivered"];
+    
+    // Don't show if already cancelled or delivered
+    if (currentStatus === "Cancelled" || currentStatus === "Delivered") {
+      return false;
+    }
+    
+    // Only show if current status is immediately before target in flow
+    const currentIndex = statusFlow.indexOf(currentStatus);
+    const targetIndex = statusFlow.indexOf(targetStatus);
+    
+    return currentIndex === targetIndex - 1;
   };
 
   if (loading) return <p>Loading orders...</p>;
@@ -176,7 +191,7 @@ useEffect(() => {
 
               {/* Status Update Buttons */}
               <div className="flex flex-wrap gap-3">
-                {selectedOrder.status !== 'Preparing' && selectedOrder.status !== 'Cancelled' && (
+                {shouldShowButton(selectedOrder.status, "Preparing") && (
                   <button
                     onClick={() => updateStatus(selectedOrder._id, 'Preparing')}
                     className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition"
@@ -184,7 +199,8 @@ useEffect(() => {
                     Start Preparing
                   </button>
                 )}
-                {selectedOrder.status !== 'Ready' && selectedOrder.status !== 'Cancelled' && (
+                
+                {shouldShowButton(selectedOrder.status, "Ready") && (
                   <button
                     onClick={() => updateStatus(selectedOrder._id, 'Ready')}
                     className="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition"
@@ -192,12 +208,22 @@ useEffect(() => {
                     Mark as Ready
                   </button>
                 )}
-                {selectedOrder.status === 'Cancelled' && (
+                
+                {shouldShowButton(selectedOrder.status, "Out for Delivery") && (
+                  <button
+                    onClick={() => updateStatus(selectedOrder._id, 'Out for Delivery')}
+                    className="bg-purple-500 text-white px-4 py-2 rounded-lg hover:bg-purple-600 transition"
+                  >
+                    Assign for Delivery
+                  </button>
+                )}
+                
+                {(selectedOrder.status === "Cancelled" || selectedOrder.status === "Delivered") && (
                   <button
                     disabled
                     className="bg-gray-500 text-white px-4 py-2 rounded-lg cursor-not-allowed"
                   >
-                    Order Cancelled
+                    {selectedOrder.status === "Cancelled" ? "Order Cancelled" : "Order Delivered"}
                   </button>
                 )}
               </div>

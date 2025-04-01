@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { FaMotorcycle, FaCheck, FaTimes, FaSignOutAlt, FaUser, FaMapMarkerAlt } from "react-icons/fa";
+import { FaMotorcycle, FaCheck, FaTimes, FaSignOutAlt, FaUser, FaMapMarkerAlt, FaMap, FaTruck } from "react-icons/fa";
 
 const DeliveryDashboard = () => {
   const [deliveryPerson, setDeliveryPerson] = useState(null);
@@ -74,19 +74,25 @@ const DeliveryDashboard = () => {
     }
   };
 
-  const updateOrderStatus = async (orderId, status) => {
+  const markAsDelivered = async (orderId) => {
     try {
       await axios.patch(`http://localhost:3000/api/orders/${orderId}/status`, {
-        status,
+        status: "Delivered",
         deliveryPersonId: deliveryPerson._id
       });
       
       setOrders(orders.map(order => 
-        order._id === orderId ? { ...order, status } : order
+        order._id === orderId ? { ...order, status: "Delivered" } : order
       ));
     } catch (err) {
-      console.error("Failed to update order status:", err);
+      console.error("Failed to mark as delivered:", err);
+      alert("Failed to mark as delivered");
     }
+  };
+
+  const openGoogleMaps = (address) => {
+    const encodedAddress = encodeURIComponent(address);
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodedAddress}`);
   };
 
   if (loading) return <p>Loading...</p>;
@@ -141,7 +147,7 @@ const DeliveryDashboard = () => {
         {orders.length === 0 ? (
           <p className="text-gray-500">No orders available at the moment.</p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             {orders.map(order => (
               <div key={order._id} className="bg-white rounded-lg shadow-md p-4">
                 <div className="flex justify-between items-start mb-2">
@@ -156,36 +162,52 @@ const DeliveryDashboard = () => {
                   </span>
                 </div>
                 
-                <p className="text-sm text-gray-600 mb-2">
-                  From: {order.restaurant.name}
-                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                  <div>
+                    <p className="text-sm text-gray-600 mb-2">
+                      <span className="font-medium">Restaurant:</span> {order.restaurant.name}
+                    </p>
+                    <p className="text-sm mb-2">
+                      <span className="font-medium">Customer:</span> {order.customer.name}
+                    </p>
+                    <p className="text-sm mb-3">
+                      <span className="font-medium">Total:</span> ₹{order.subtotal.toFixed(2)}
+                    </p>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-3 rounded-lg">
+                    <div className="flex items-start">
+                      <FaMapMarkerAlt className="text-red-500 mt-1 mr-2" />
+                      <div>
+                        <p className="font-medium">Delivery Address:</p>
+                        <p className="text-sm">{order.deliveryAddress || order.customer.location}</p>
+                        <button 
+                          onClick={() => openGoogleMaps(order.deliveryAddress || order.customer.location)}
+                          className="mt-2 text-blue-500 hover:text-blue-700 text-sm flex items-center"
+                        >
+                          <FaMap className="mr-1" />
+                          Open in Maps
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
                 
-                <p className="text-sm mb-2">
-                  <span className="font-medium">Customer:</span> {order.customer.name}
-                </p>
-                
-                <p className="text-sm mb-2">
-                  <FaMapMarkerAlt className="inline mr-1" />
-                  {order.deliveryAddress}
-                </p>
-                
-                <p className="text-sm mb-3">
-                  <span className="font-medium">Total:</span> ₹{order.subtotal.toFixed(2)}
-                </p>
-                
-                <div className="flex space-x-2">
+                <div className="flex space-x-2 mt-4">
                   {order.status === "Ready" && !order.deliveryPersonId && (
                     <>
                       <button
                         onClick={() => acceptOrder(order._id)}
-                        className="bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 flex-1"
+                        className="bg-green-500 text-white px-3 py-2 rounded text-sm hover:bg-green-600 flex-1 flex items-center justify-center"
                       >
+                        <FaCheck className="mr-2" />
                         Accept Order
                       </button>
                       <button
                         onClick={() => rejectOrder(order._id)}
-                        className="bg-red-500 text-white px-3 py-1 rounded text-sm hover:bg-red-600 flex-1"
+                        className="bg-red-500 text-white px-3 py-2 rounded text-sm hover:bg-red-600 flex-1 flex items-center justify-center"
                       >
+                        <FaTimes className="mr-2" />
                         Reject
                       </button>
                     </>
@@ -193,9 +215,10 @@ const DeliveryDashboard = () => {
                   
                   {order.deliveryPersonId === deliveryPerson._id && order.status === "Out for Delivery" && (
                     <button
-                      onClick={() => updateOrderStatus(order._id, "Delivered")}
-                      className="bg-purple-500 text-white px-3 py-1 rounded text-sm hover:bg-purple-600 w-full"
+                      onClick={() => markAsDelivered(order._id)}
+                      className="bg-purple-500 text-white px-3 py-2 rounded text-sm hover:bg-purple-600 w-full flex items-center justify-center"
                     >
+                      <FaTruck className="mr-2" />
                       Mark as Delivered
                     </button>
                   )}
