@@ -1,7 +1,7 @@
-import React, { useState,useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";  // ✅ Import useNavigate
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaStar, FaMapMarkerAlt } from "react-icons/fa";
 import Navbar from "./NavBar";
 
 const UserDashboard = () => {
@@ -14,12 +14,11 @@ const UserDashboard = () => {
     
     const navigate = useNavigate();
 
- 
     useEffect(() => {
         const fetchRestaurants = async () => {
             setLoading(true);
             try {
-                const response = await fetch("http://localhost:3000/api/restaurants"); // ✅ Updated URL
+                const response = await fetch("http://localhost:3000/api/restaurants");
                 if (!response.ok) {
                     throw new Error("Failed to fetch restaurants");
                 }
@@ -38,7 +37,7 @@ const UserDashboard = () => {
 
     useEffect(() => {
         if (!searchQuery.trim()) {
-            setFilteredRestaurants(foodItems); // Show all when empty
+            setFilteredRestaurants(foodItems);
             return;
         }
 
@@ -51,55 +50,84 @@ const UserDashboard = () => {
         setFilteredRestaurants(filteredData);
     }, [searchQuery, foodItems]);
 
-const handleRestaurantClick = (restaurant) => {
-    const id = restaurant.restaurantId || restaurant.restaurantID
-
-    navigate(`/user/${username}/${restaurant.restaurantName}`, {
-        state: { 
-            restaurantId: id,
-            restaurantName: restaurant.restaurantName  // Pass the name directly here
-        },
-    });
-};
-
+    const handleRestaurantClick = (restaurant) => {
+        const id = restaurant.restaurantId || restaurant.restaurantID;
+        navigate(`/user/${username}/${restaurant.restaurantName}`, {
+            state: { 
+                restaurantId: id,
+                restaurantName: restaurant.restaurantName
+            },
+        });
+    };
 
     return (
-        <div className="bg-gray-100 min-h-screen text-gray-800">
-            <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />  {/* Use Navbar Component */}
+        <div className="bg-gray-50 min-h-screen text-gray-800">
+            <Navbar searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
-             {/* Restaurant Listing */}
-             <div className="pt-[80px] p-3">
+            {/* Main Content */}
+            <main className="pt-24 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+                {/* Header */}
+                <div className="mb-8 text-center">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">Discover Restaurants</h1>
+                    <p className="text-gray-600">Find the best dining experiences in your area</p>
+                </div>
+
+                {/* Restaurant Listing */}
                 {loading ? (
-                    <p className="text-gray-700 text-center">Loading restaurants...</p>
+                    <div className="flex justify-center items-center h-64">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+                    </div>
                 ) : error ? (
-                    <p className="text-red-500 text-center">{error}</p>
+                    <div className="bg-red-50 p-4 rounded-lg max-w-md mx-auto text-center">
+                        <p className="text-red-600 font-medium">{error}</p>
+                    </div>
                 ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                         {filteredRestaurants.length > 0 ? (
                             filteredRestaurants.map((restaurant) => (
                                 <motion.div
                                     key={restaurant._id}
-                                    onClick={()  => handleRestaurantClick(restaurant)}
-                                    className="relative cursor-pointer bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:scale-[1.03] w-[210px] h-[170px] mx-auto"
+                                    whileHover={{ y: -5 }}
+                                    onClick={() => handleRestaurantClick(restaurant)}
+                                    className="bg-gray-100 rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
                                 >
-                                    {/* Small Image */}
-                                    <img
-                                        src={`http://localhost:3000${restaurant.restaurantImage}`}
-                                        alt={restaurant.restaurantName}
-                                        className="w-full h-[140px] object-cover"
-                                    />
-                                    {/* Restaurant Name (Bottom Left of Image) */}
-                                    <div className="absolute bottom-1 left-1 bg-black/60 px-2 py-1 text-white text-xs font-medium rounded">
-                                        {restaurant.restaurantName}
+                                    {/* Restaurant Image */}
+                                    <div className="relative h-48 overflow-hidden">
+                                        <img
+                                            src={`http://localhost:3000${restaurant.restaurantImage}`}
+                                            alt={restaurant.restaurantName}
+                                            className="w-full h-full object-cover"
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                                    </div>
+                                    
+                                    {/* Restaurant Info */}
+                                    <div className="p-4">
+                                        <h3 className="font-bold text-lg mb-1 truncate">{restaurant.restaurantName}</h3>
+                                        <div className="flex items-center text-gray-600 mb-2">
+                                            <FaMapMarkerAlt className="mr-1 text-sm" />
+                                            <span className="text-sm">{restaurant.location}</span>
+                                        </div>
+                                        <div className="flex items-center">
+                                            <div className="flex items-center bg-blue-50 px-2 py-1 rounded">
+                                                <FaStar className="text-yellow-400 mr-1" />
+                                                <span className="font-medium text-sm">4.5</span>
+                                            </div>
+                                            <span className="ml-2 text-sm text-gray-500">• 25 reviews</span>
+                                        </div>
                                     </div>
                                 </motion.div>
                             ))
                         ) : (
-                            <p className="text-gray-700 text-center col-span-3">No matching restaurants found.</p>
+                            <div className="col-span-full text-center py-12">
+                                <FaSearch className="mx-auto text-4xl text-gray-300 mb-4" />
+                                <h3 className="text-xl font-medium text-gray-700">No restaurants found</h3>
+                                <p className="text-gray-500 mt-1">Try adjusting your search query</p>
+                            </div>
                         )}
                     </div>
                 )}
-            </div>
+            </main>
         </div>
     );
 };
