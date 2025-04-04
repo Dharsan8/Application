@@ -16,7 +16,13 @@ const FoodItemSchema = new mongoose.Schema(
     restaurantId: { type: String, required: true },
     location: String,        // ✅ Added
   restaurantName: String,  // ✅ Added
-    discount: { type: Number, default: 0 } 
+    discount: { type: Number, default: 0 },
+    ratings: [
+      {
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },
+        rating: { type: Number, required: true, min: 1, max: 5 }
+      }
+    ],averageRating: { type: Number, default: 0 }
   },
   { timestamps: true }
 );

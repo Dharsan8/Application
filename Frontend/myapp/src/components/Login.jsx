@@ -20,7 +20,12 @@ const Login = () => {
       const response = await axios.post(url, data);
 
       if (isLogin) {
-        const { customer } = response.data;
+        const { customer,token } = response.data;
+        localStorage.setItem('userId', customer.id);
+        localStorage.setItem('username', customer.name);
+        localStorage.setItem('token', token);
+
+        console.log(localStorage.getItem('userId'));
         alert("Login Successful");
         navigate(`/user/${customer.name}`);
       } else {

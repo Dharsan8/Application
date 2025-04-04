@@ -1,10 +1,11 @@
 import React from 'react';
 import { useState, useEffect } from "react";
 import { useLocation,useParams } from "react-router-dom";
-import { FaUserCircle, FaShoppingCart, FaTimes } from 'react-icons/fa';
+import { FaUserCircle, FaShoppingCart, FaTimes, FaStar, FaChevronDown } from 'react-icons/fa';
 import { motion } from 'framer-motion';
 import { FaMoneyBillWave } from 'react-icons/fa';
 import { SiGooglepay, SiPhonepe, SiApplepay } from 'react-icons/si';
+import axios from 'axios';
 
 const FoodItem = () => {
     const location = useLocation();
@@ -21,6 +22,10 @@ const FoodItem = () => {
     const [phone, setPhone] = useState('');
     const [showPayment, setShowPayment] = useState(false);
     const [selectedMethod, setSelectedMethod] = useState(null);
+    const [ratings, setRatings] = useState({});
+    const [submittedRatings, setSubmittedRatings] = useState({});
+    const userId = localStorage.getItem('userId');
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
 
     useEffect(() => {
@@ -50,6 +55,35 @@ const FoodItem = () => {
         fetchFoodItems();
     }, [restaurantId]);
 
+    const handleRatingChange = (foodItemId, value) => {
+        setRatings(prev => ({ ...prev, [foodItemId]: value }));
+    };
+
+    const submitRating = async (foodItemId) => {
+        try {
+            const response = await axios.post(`http://localhost:3000/api/food/rate/${foodItemId}`, {
+                userId,
+                rating: ratings[foodItemId]
+            });
+    
+            alert(response.data.message);
+    
+            setSubmittedRatings(prev => ({
+                ...prev,
+                [foodItemId]: ratings[foodItemId]
+            }));
+    
+            // Update the average rating in the local state
+            setFoodItems(prevItems => prevItems.map(item => 
+                item._id === foodItemId 
+                    ? { ...item, averageRating: response.data.averageRating } 
+                    : item
+            ));
+        } catch (error) {
+            console.error("Error submitting rating:", error);
+        }
+    };
+    
 
     if (loading) return <p>Loading food items...</p>;
     if (error) return <p className="text-red-500">{error}</p>;
@@ -150,7 +184,26 @@ const FoodItem = () => {
         }
       };
 
+ // Render stars for average rating
+ const renderStars = (rating) => {
+    return Array.from({ length: 5 }, (_, index) => (
+        <FaStar 
+            key={index} 
+            className={`text-xs ${index < rating ? 'text-green-500' : 'text-gray-300'}`} 
+        />
+    ));
+};
 
+// Render stars for the dropdown rating selection
+const renderDropdownStars = (foodItemId, selectedRating) => {
+    return Array.from({ length: 5 }, (_, index) => (
+        <FaStar
+            key={index}
+            onClick={() => handleRatingChange(foodItemId, index + 1)}
+            className={`text-sm cursor-pointer ${index < selectedRating ? 'text-green-500' : 'text-gray-300'}`}
+        />
+    ));
+};
 
     return (
         <div>
@@ -191,109 +244,142 @@ const FoodItem = () => {
             <div className={`flex transition-all duration-500 mt-14`}>
                 {/* Food Items */}
                 <div className={`transition-all duration-500 ${isDrawerOpen ? "pr-[25%]" : "w-full"}`}>
-                    <div 
-                        className="grid gap-10 p-6" 
-                        style={{ gridTemplateColumns: isDrawerOpen ? "repeat(4, 1fr)" : "repeat(5, 1fr)" }}
-                    >
-                        {loading ? (
-                            <p>Loading...</p>
-                        ) : error ? (
-                            <p>{error}</p>
-                        ) : (
-                            foodItems.map((item) => {
-                                const isAvailable = item.availability === "Available";
-                                return (
-                                    <div 
-                                        key={item._id} 
-                                        className={`
-                                            bg-white shadow-md rounded-xl p-3 border border-gray-200 relative 
-                                            transition-transform duration-300 
-                                            ${isAvailable ? "hover:scale-105" : ""}
-                                            ${!isAvailable ? "opacity-70" : ""}
-                                        `}
-                                    >
-                                        {/* Out of Stock Overlay */}
-                                        {!isAvailable && (
-                                            <div className="absolute inset-0 bg-white bg-opacity-60 rounded-xl z-10"></div>
-                                        )}
-                                        
-                                        {/* Discount Badge */}
-                                        {item.discount > 0 && (
-                                            <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-lg shadow-md z-20">
-                                                {item.discount}% OFF
-                                            </div>
-                                        )}
-                                        
-                                        {/* Out of Stock Badge */}
-                                        {!isAvailable && (
-                                            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded z-20">
-                                                OUT OF STOCK
-                                            </div>
-                                        )}
-                                        
-                                        {/* Food Image */}
-                                        <img
-                                            src={`http://localhost:3000${item.image}`}
-                                            alt={item.name}
-                                            className={`w-full h-32 object-cover rounded-lg ${!isAvailable ? "filter blur-[1px]" : ""}`}
-                                        />
-                                        
-                                        {/* Food Details */}
-                                        <h3 className={`text-lg font-semibold mt-2 truncate ${
-                                            isAvailable ? "text-gray-800" : "text-gray-500"
-                                        }`}>
-                                            {item.name}
-                                        </h3>
-                                        <p className="text-sm text-gray-500">{item.category}</p>
+            <div 
+                className="grid gap-10 p-6" 
+                style={{ gridTemplateColumns: isDrawerOpen ? "repeat(4, 1fr)" : "repeat(5, 1fr)" }}
+            >
+                {loading ? (
+                    <p>Loading...</p>
+                ) : error ? (
+                    <p>{error}</p>
+                ) : (
+                    foodItems.map((item) => {
+                        const isAvailable = item.availability === "Available";
+                        const averageRating = item.averageRating || 0; // Default average rating
 
-                                        <div className="mt-2 flex justify-between items-center">
-                                            <div className="flex items-center space-x-2">
-                                                {item.discount > 0 ? (
-                                                    <>
-                                                        <p className="text-gray-500 line-through text-sm">₹{item.price}</p>
-                                                        <p className={`font-semibold text-base ${
-                                                            isAvailable ? "text-green-600" : "text-gray-400"
-                                                        }`}>
-                                                            ₹{item.discountPrice.toFixed(2)}
-                                                        </p>
-                                                    </>
-                                                ) : (
-                                                    <p className={`font-semibold text-base ${
-                                                        isAvailable ? "text-gray-700" : "text-gray-400"
-                                                    }`}>
-                                                        ₹{item.price}
-                                                    </p>
-                                                )}
-                                            </div>
-                                            <p className={`font-semibold text-sm ${
-                                                isAvailable ? "text-green-600" : "text-red-600"
-                                            }`}>
-                                                {item.availability}
-                                            </p>
-                                        </div>
-
-                                        {/* Add to Cart Button */}
-                                        <button 
-                                            onClick={() => isAvailable && addToCart(item)} 
-                                            className={`
-                                                w-1/2 py-1 rounded-[10px] text-white shadow-lg 
-                                                transition-all duration-300 mt-2
-                                                text-sm font-semibold tracking-wide
-                                                ${isAvailable 
-                                                    ? "bg-red-400 hover:bg-red-500 shadow-red-300/50 hover:shadow-red-400/70 cursor-pointer" 
-                                                    : "bg-gray-400 cursor-not-allowed"}
-                                            `}
-                                            disabled={!isAvailable}
-                                            aria-disabled={!isAvailable}
-                                        >
-                                            {isAvailable ? "Add to Cart" : "Unavailable"}
-                                        </button>
+                        return (
+                            <div 
+                                key={item._id} 
+                                className={`
+                                    bg-white shadow-md rounded-xl p-3 border border-gray-200 relative 
+                                    transition-transform duration-300 
+                                    ${isAvailable ? "hover:scale-105" : ""}
+                                    ${!isAvailable ? "opacity-70" : ""}
+                                `}
+                            >
+                                {!isAvailable && (
+                                    <div className="absolute inset-0 bg-white bg-opacity-60 rounded-xl z-10"></div>
+                                )}
+                                
+                                {item.discount > 0 && (
+                                    <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-semibold px-2 py-1 rounded-lg shadow-md z-20">
+                                        {item.discount}% OFF
                                     </div>
-                                );
-                            })
-                        )}
-                    </div>
-                </div>     
+                                )}
+                                
+                                {!isAvailable && (
+                                    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded z-20">
+                                        OUT OF STOCK
+                                    </div>
+                                )}
+                                
+                                <img
+                                    src={`http://localhost:3000${item.image}`}
+                                    alt={item.name}
+                                    className={`w-full h-32 object-cover rounded-lg ${!isAvailable ? "filter blur-[1px]" : ""}`}
+                                />
+
+                                <h3 className={`text-lg font-semibold mt-2 truncate ${
+                                    isAvailable ? "text-gray-800" : "text-gray-500"
+                                }`}>
+                                    {item.name}
+                                </h3>
+                                <p className="text-sm text-gray-500">{item.category}</p>
+
+                                <div className="mt-2 flex justify-between items-center">
+                                    <div className="flex items-center space-x-2">
+                                        {item.discount > 0 ? (
+                                            <>
+                                                <p className="text-gray-500 line-through text-sm">₹{item.price}</p>
+                                                <p className={`font-semibold text-base ${
+                                                    isAvailable ? "text-green-600" : "text-gray-400"
+                                                }`}>
+                                                    ₹{item.discountPrice.toFixed(2)}
+                                                </p>
+                                            </>
+                                        ) : (
+                                            <p className={`font-semibold text-base ${
+                                                isAvailable ? "text-gray-700" : "text-gray-400"
+                                            }`}>
+                                                ₹{item.price}
+                                            </p>
+                                        )}
+                                    </div>
+                                    <p className={`font-semibold text-sm ${
+                                        isAvailable ? "text-green-600" : "text-red-600"
+                                    }`}>
+                                        {item.availability}
+                                    </p>
+                                </div>
+
+                                {/* Display Average Rating */}
+                                <div className="mt-4">
+           {/* Display Average Rating */}
+           <div className="flex items-center space-x-2 text-sm font-semibold">
+                <span className="text-gray-700">Rating:</span>
+                <div className="flex items-center space-x-1">
+                    {renderStars(Math.round(item.averageRating || 0))}
+                </div>
+                <div className="text-yellow-500">
+                    {item.averageRating || 0} ⭐
+                </div>
+                <FaChevronDown
+                    className="text-gray-500 cursor-pointer"
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                />
+            </div>
+
+            {/* Dropdown for selecting rating */}
+            {isDropdownOpen && (
+                <div className="mt-2 p-2 border border-gray-200 rounded bg-white shadow-sm transition duration-300 ease-in-out flex items-center space-x-2">
+                    {/* Stars for rating selection */}
+                    {renderDropdownStars(item._id, ratings[item._id] || 0)}
+
+                    {/* Submit button next to stars */}
+                    <button
+                        onClick={() => {
+                            submitRating(item._id);
+                            setIsDropdownOpen(false);  // Close the dropdown after submission
+                        }}
+                        className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
+                    >
+                        Submit
+                    </button>
+                </div>
+            )}
+            </div>
+
+                                <button 
+                                    onClick={() => isAvailable && addToCart(item)} 
+                                    className={`
+                                        w-1/2 py-1 rounded-[10px] text-white shadow-lg 
+                                        transition-all duration-300 mt-2
+                                        text-sm font-semibold tracking-wide
+                                        ${isAvailable 
+                                            ? "bg-red-400 hover:bg-red-500 shadow-red-300/50 hover:shadow-red-400/70 cursor-pointer" 
+                                            : "bg-gray-400 cursor-not-allowed"}
+                                    `}
+                                    disabled={!isAvailable}
+                                    aria-disabled={!isAvailable}
+                                >
+                                    {isAvailable ? "Add to Cart" : "Unavailable"}
+                                </button>
+                            </div>
+                        );
+                    })
+                )}
+            </div>
+        </div>
 
                 {/* Cart Drawer */}
                 <div className={`fixed top-14 right-0 h-[calc(100vh-56px)] bg-white shadow-lg border-l transition-all duration-500 ${isDrawerOpen ? "w-1/4" : "w-0 overflow-hidden"}`}>
