@@ -13,7 +13,7 @@ const foodItems = require("./routes/foodItems")
 const orderRoutes = require("./routes/Order");
 const deliveryRoutes = require("./routes/delivery");
 const orderRouting = require("./routes/orderRoutes");
-
+const feedbackRoutes = require('./routes/feedback');
 
 
 const app = express();
@@ -48,6 +48,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/delivery", deliveryRoutes);
 app.use("/api/orders", orderRouting);
 app.use(foodRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 // Port
 const PORT = process.env.PORT || 3000;

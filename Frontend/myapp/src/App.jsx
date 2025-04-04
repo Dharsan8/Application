@@ -17,7 +17,7 @@ import DeliveryRegister from "./components/Delivery/DeliveryRegister";
 import DeliveryLogin from "./components/Delivery/DeliveryLogin";
 import DeliveryDashboard from "./components/Delivery/DeliveryDashboard";
 import OrderHistory from "./components/User/OrderHistory";
-
+import FeedbackForm from "./components/User/FeedbackForm";
 function App() {
   return (
     <Router>
@@ -42,6 +42,7 @@ function App() {
         <Route path="/delivery-register" element={<DeliveryRegister />} />
 <Route path="/delivery-login" element={<DeliveryLogin />} />
 <Route path="/delivery-dashboard" element={<DeliveryDashboard />} />
+<Route path="/feedback/:orderId" element={<FeedbackForm />} />
       </Routes>
     </Router>
   );

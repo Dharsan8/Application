@@ -6,19 +6,10 @@ const feedbackSchema = new mongoose.Schema({
     ref: 'Order',
     required: true
   },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
-  },
-  userName: {
+  name: {  // New name field instead of username/userId
     type: String,
-    required: true
-  },
-  restaurantId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Restaurant',
-    required: true
+    required: true,
+    trim: true
   },
   rating: {
     type: Number,
@@ -26,19 +17,22 @@ const feedbackSchema = new mongoose.Schema({
     min: 1,
     max: 5
   },
-  review: {
-    type: String,
-    maxlength: 500
-  },
   foodQuality: {
     type: Number,
+    required: true,
     min: 1,
     max: 5
   },
   deliveryExperience: {
     type: Number,
+    required: true,
     min: 1,
     max: 5
+  },
+  comments: {
+    type: String,
+    trim: true,
+    maxlength: 500
   },
   createdAt: {
     type: Date,
