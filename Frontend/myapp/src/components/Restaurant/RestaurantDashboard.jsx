@@ -25,6 +25,7 @@ export default function RestaurantDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate();
   const [activePage, setActivePage] = useState("viewItems");
+  const [restaurantStatus, setRestaurantStatus] = useState(false);
 
   useEffect(() => {
     const storedRestaurant = localStorage.getItem("restaurantData");
@@ -118,128 +119,176 @@ export default function RestaurantDashboard() {
       console.error("Error updating food item:", error);
     }
   };
+  useEffect(() => {
+    if (restaurant?.isOpen !== undefined) {
+      setRestaurantStatus(restaurant.isOpen);
+    }
+  }, [restaurant]);
+
+  const handleToggleStatus = async () => {
+    const newStatus = !restaurantStatus;
+    setRestaurantStatus(newStatus);
+
+    try {
+      await axios.patch(
+        `http://localhost:3000/api/restaurants/${restaurant._id}/resstatus`,
+        { isOpen: newStatus }
+      );
+      console.log("Status updated successfully");
+    } catch (error) {
+      console.error("Failed to update status:", error);
+    }
+  };
 
   return (
     <div className="flex min-h-screen">
-      <div
-        className={`bg-[#8A4F7D] text-white h-screen p-5 transition-all flex flex-col ${
-          sidebarOpen ? "w-56" : "w-16"
-        }`}
-        style={{ height: "100vh", overflowY: "auto" }}
-      >
-        <div className="flex items-center justify-between mb-6">
-          <h2
-            className={`text-xl font-bold transition-all ${
-              sidebarOpen ? "opacity-100" : "opacity-0 w-0 overflow-hidden"
-            }`}
-          >
-            {restaurant?.restaurantName || "Restaurant"}
-          </h2>
-          <FaBars
-            className="text-white text-2xl cursor-pointer"
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-          />
-        </div>
+<div
+  className={`bg-[#8A4F7D] text-white h-screen p-3 transition-all flex flex-col shadow-lg ${
+    sidebarOpen ? "w-52" : "w-14"
+  }`}
+  style={{ height: "100vh", overflowY: "auto" }}
+>
+  {/* Header */}
+  <div className="flex items-center justify-between mb-4">
+    <h2
+      className={`text-sm font-semibold tracking-wide transition-all duration-300 ${
+        sidebarOpen ? "opacity-100" : "opacity-0 w-0 overflow-hidden"
+      }`}
+    >
+      {restaurant?.restaurantName || "Restaurant"}
+    </h2>
+    <FaBars
+      className="text-white text-lg cursor-pointer hover:scale-110 transition"
+      onClick={() => setSidebarOpen(!sidebarOpen)}
+    />
+  </div>
 
-        {sidebarOpen && (
-          <nav className="flex flex-col flex-grow justify-center items-center space-y-4">
-            <button
-              className={`flex items-center space-x-3 w-full py-3 px-4 rounded-md transition ${
-                activePage === "viewItems"
-                  ? "bg-[#6B3A63]"
-                  : "hover:bg-[#6B3A63]"
-              }`}
-              onClick={() => setActivePage("viewItems")}
-            >
-              <FaEye className="text-xl" />
-              <span>View Items</span>
-            </button>
+  {/* Navigation - Centered Vertically */}
+  <div className="flex-grow flex items-center justify-center">
+    {sidebarOpen && (
+      <nav className="flex flex-col space-y-3 w-full px-1">
+        <button
+          className={`flex items-center justify-start w-full py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
+            activePage === "viewItems"
+              ? "bg-[#6B3A63]"
+              : "hover:bg-[#6B3A63]/80"
+          }`}
+          onClick={() => setActivePage("viewItems")}
+        >
+          <FaEye className="text-sm mr-3" />
+          <span>View Items</span>
+        </button>
 
-            <button
-              className={`flex items-center space-x-3 w-full py-3 px-4 rounded-md transition ${
-                activePage === "addItem"
-                  ? "bg-[#6B3A63]"
-                  : "hover:bg-[#6B3A63]"
-              }`}
-              onClick={() => setActivePage("addItem")}
-            >
-              <FaPlus className="text-xl" />
-              <span>Create Item</span>
-            </button>
+        <button
+          className={`flex items-center justify-start w-full py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
+            activePage === "addItem"
+              ? "bg-[#6B3A63]"
+              : "hover:bg-[#6B3A63]/80"
+          }`}
+          onClick={() => setActivePage("addItem")}
+        >
+          <FaPlus className="text-sm mr-3" />
+          <span>Create Item</span>
+        </button>
 
-            <button
-              className={`flex items-center space-x-3 w-full py-3 px-4 rounded-md transition ${
-                activePage === "feedback"
-                  ? "bg-[#6B3A63]"
-                  : "hover:bg-[#6B3A63]"
-              }`}
-              onClick={() => setActivePage("feedback")}
-            >
-              <FaCommentDots className="text-xl" />
-              <span>Feedback</span>
-            </button>
-            
-  <button
-    className={`flex items-center space-x-3 w-full py-3 px-4 rounded-md transition ${
-      activePage === "orders"
-        ? "bg-[#6B3A63]"
-        : "hover:bg-[#6B3A63]"
-    }`}
-    onClick={() => setActivePage("orders")}
-  >
-    <FaClipboardList className="text-xl" />
-    <span>Orders</span>
-  </button>
+        <button
+          className={`flex items-center justify-start w-full py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
+            activePage === "feedback"
+              ? "bg-[#6B3A63]"
+              : "hover:bg-[#6B3A63]/80"
+          }`}
+          onClick={() => setActivePage("feedback")}
+        >
+          <FaCommentDots className="text-sm mr-3" />
+          <span>Feedback</span>
+        </button>
 
-          </nav>
-        )}
-      </div>
+        <button
+          className={`flex items-center justify-start w-full py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
+            activePage === "orders"
+              ? "bg-[#6B3A63]"
+              : "hover:bg-[#6B3A63]/80"
+          }`}
+          onClick={() => setActivePage("orders")}
+        >
+          <FaClipboardList className="text-sm mr-3" />
+          <span>Orders</span>
+        </button>
+      </nav>
+    )}
+  </div>
+</div>
+
 
       <div className="flex-1 bg-gray-100 relative">
-        <nav className="bg-[#8A4F7D] p-4 flex justify-between items-center shadow-lg relative">
-          <h1 className="text-white text-2xl font-extrabold tracking-wide uppercase">
-            Restaurant Dashboard
-          </h1>
-          {restaurant && (
-            <div className="relative">
-              <FaUserCircle
-                className="text-white text-4xl cursor-pointer hover:scale-110 transition-transform duration-200"
-                onClick={() => setIsOpen(!isOpen)}
+      <nav className="bg-[#8A4F7D] px-4 py-2 flex justify-between items-center shadow-md relative h-14">
+      {/* Logo / Title */}
+      <h1 className="text-white text-sm font-bold tracking-wider uppercase">
+        Restaurant Dashboard
+      </h1>
+
+      {restaurant && (
+        <div className="flex items-center gap-4 relative">
+          {/* Toggle Open/Close */}
+          <div className="flex items-center gap-2">
+            <span className="text-white text-xs font-medium">
+              {restaurantStatus ? "🟢 Open" : "🔴 Closed"}
+            </span>
+            <div
+              className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer transition duration-300 ${
+                restaurantStatus ? "bg-green-400" : "bg-red-400"  
+              }`}
+              onClick={handleToggleStatus}
+            >
+              <div
+                className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ${
+                  restaurantStatus ? "translate-x-5" : "translate-x-0"
+                }`}
               />
-              {isOpen && (
-                <div className="absolute right-0 mt-3 w-72 bg-white rounded-xl shadow-2xl p-5 border border-gray-200 z-50">
-                  <h2 className="text-xl font-semibold text-[#8A4F7D] text-center border-b pb-2">
-                    {restaurant.restaurantName}
-                  </h2>
-                  <div className="mt-3 space-y-2 text-gray-800">
-                    <p className="flex justify-between">
-                      <span className="font-semibold">Owner:</span>{" "}
-                      {restaurant.ownerName}
-                    </p>
-                    <p className="flex justify-between">
-                      <span className="font-semibold">Location:</span>{" "}
-                      {restaurant.location}
-                    </p>
-                    <p className="flex justify-between">
-                      <span className="font-semibold">Email:</span>{" "}
-                      {restaurant.email}
-                    </p>
-                    <p className="flex justify-between">
-                      <span className="font-semibold">Phone:</span>{" "}
-                      {restaurant.phoneNumber}
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleLogout}
-                    className="mt-4 w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-2 rounded-lg transition-all font-semibold shadow-md hover:shadow-lg"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
+            </div>
+          </div>
+
+          {/* Profile Icon */}
+          <FaUserCircle
+            className="text-white text-2xl cursor-pointer hover:scale-110 transition-transform duration-200"
+            onClick={() => setIsOpen(!isOpen)}
+          />
+
+          {/* Dropdown Panel */}
+          {isOpen && (
+            <div className="absolute right-0 top-12 w-64 bg-white rounded-xl shadow-xl p-4 border border-gray-200 z-50">
+              <h2 className="text-lg font-semibold text-[#8A4F7D] text-center border-b pb-2">
+                {restaurant.restaurantName}
+              </h2>
+              <div className="mt-2 space-y-1 text-gray-700 text-sm">
+                <p className="flex justify-between">
+                  <span className="font-medium">Owner:</span>
+                  {restaurant.ownerName}
+                </p>
+                <p className="flex justify-between">
+                  <span className="font-medium">Location:</span>
+                  {restaurant.location}
+                </p>
+                <p className="flex justify-between">
+                  <span className="font-medium">Email:</span>
+                  {restaurant.email}
+                </p>
+                <p className="flex justify-between">
+                  <span className="font-medium">Phone:</span>
+                  {restaurant.phoneNumber}
+                </p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="mt-3 w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-1.5 rounded-md transition-all text-sm font-semibold shadow-sm hover:shadow-md"
+              >
+                Logout
+              </button>
             </div>
           )}
-        </nav>
+        </div>
+      )}
+    </nav>
 
         <div
           className="p-6"
