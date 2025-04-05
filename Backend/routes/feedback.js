@@ -6,30 +6,27 @@ const auth = require('../middleware/auth');
 
 // Submit feedback
 router.post('/', async (req, res) => {
-    try {
-      const { orderId, name, rating, foodQuality, deliveryExperience, comments } = req.body;
-  
-      // Basic validation
-      if (!orderId || !name || !rating || !foodQuality || !deliveryExperience) {
-        return res.status(400).json({ error: 'Missing required fields' });
-      }
-  
-      const feedback = new Feedback({
-        orderId,
-        name, // Using name instead of username/userId
-        rating,
-        foodQuality,
-        deliveryExperience,
-        comments
-      });
-  
-      await feedback.save();
-      res.status(201).json(feedback);
-    } catch (error) {
-      res.status(400).json({ error: error.message });
-    }
-  });
-  
+  try {
+    const { orderId, restaurantId, restaurantName, name, rating, foodQuality, deliveryExperience, comments } = req.body;
+
+    const feedback = new Feedback({
+      orderId,
+      restaurantId,
+      restaurantName,
+      name,
+      rating,
+      foodQuality,
+      deliveryExperience,
+      comments
+    });
+
+    await feedback.save();
+    res.status(201).json(feedback);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+});
+
 
 // Get feedback for an order
 router.get('/:orderId', auth, async (req, res) => {
@@ -58,4 +55,16 @@ router.get('/', async (req, res) => {
     }
   });
   
+
+// In your feedback routes file
+router.get('/restaurant/:restaurantId', async (req, res) => {
+  try {
+      const feedbacks = await Feedback.find({ restaurantId: req.params.restaurantId })
+          .sort({ createdAt: -1 });
+      res.json(feedbacks);
+  } catch (err) {
+      res.status(500).json({ message: err.message });
+  }
+});
+
 module.exports = router;

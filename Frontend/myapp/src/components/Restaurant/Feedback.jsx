@@ -22,25 +22,25 @@ const Feedback = () => {
 
     useEffect(() => {
         let isMounted = true;
-
+    
         const fetchData = async () => {
             try {
                 if (!restaurant?.restaurantID) {
                     throw new Error("Restaurant data not found");
                 }
-
+    
                 // Fetch food items for this restaurant
                 const foodResponse = await axios.get(
                     `http://localhost:3000/api/food/restaurant/${restaurant.restaurantID}`,
                     { timeout: 5000 }
                 );
-
-                // Fetch all feedback
+    
+                // Fetch feedback for this specific restaurant
                 const feedbackResponse = await axios.get(
-                    'http://localhost:3000/api/feedback',
+                    `http://localhost:3000/api/feedback/restaurant/${restaurant.restaurantID}`,
                     { timeout: 5000 }
                 );
-
+    
                 if (isMounted) {
                     setFoodItems(foodResponse.data);
                     setFeedbackData(feedbackResponse.data);
@@ -54,9 +54,9 @@ const Feedback = () => {
                 }
             }
         };
-
+    
         fetchData();
-
+    
         return () => {
             isMounted = false;
         };

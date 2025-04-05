@@ -7,7 +7,8 @@ const FeedbackForm = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
   const [feedback, setFeedback] = useState({
-    name: "", // Added name field
+    name: "",
+    restaurantName: "",
     rating: 0,
     foodQuality: 0,
     deliveryExperience: 0,
@@ -27,6 +28,12 @@ const FeedbackForm = () => {
           throw new Error("This order is not eligible for feedback");
         }
         setOrderDetails(response.data);
+        // Set restaurant name from order details
+        setFeedback(prev => ({
+          ...prev,
+          restaurantName: response.data.restaurant?.name || ""
+
+        }));
       } catch (error) {
         setError(error.message);
       } finally {
@@ -50,7 +57,10 @@ const FeedbackForm = () => {
     try {
       await axios.post("http://localhost:3000/api/feedback", {
         orderId,
-        name: feedback.name, // Include name in submission
+        restaurantId: orderDetails?.restaurant?.id,
+
+        restaurantName: feedback.restaurantName,
+        name: feedback.name,
         rating: feedback.rating,
         foodQuality: feedback.foodQuality,
         deliveryExperience: feedback.deliveryExperience,
@@ -84,7 +94,7 @@ const FeedbackForm = () => {
         </div>
       </div>
       <button
-           onClick={() => navigate(`/order-history/${orderDetails?.customer?.username || ''}`)}
+        onClick={() => navigate(`/order-history/${orderDetails?.customer?.username || ''}`)}
         className="mt-4 px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300"
       >
         Back to Order History
@@ -109,9 +119,23 @@ const FeedbackForm = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-4">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Rate Your Order #{orderId.substring(18, 24).toUpperCase()}</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-6">
+        Rate Your Order #{orderId.substring(18, 24).toUpperCase()} from {orderDetails?.restaurant?.restaurantName || "Restaurant"}
+      </h1>
       
       <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Hidden restaurant fields */}
+        <input 
+          type="hidden" 
+          name="restaurantName" 
+          value={feedback.restaurantName} 
+        />
+        <input 
+          type="hidden" 
+          name="restaurantId" 
+          value={orderDetails?.restaurant?.restaurantID || ""} 
+        />
+
         {/* Name Field */}
         <div>
           <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">

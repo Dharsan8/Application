@@ -6,6 +6,14 @@ const feedbackSchema = new mongoose.Schema({
     ref: 'Order',
     required: true
   },
+  restaurantId: {
+    type: String,
+    required: true
+  },
+  restaurantName: {
+    type: String,
+    required: true
+  },
   name: {  // New name field instead of username/userId
     type: String,
     required: true,
@@ -23,6 +31,7 @@ const feedbackSchema = new mongoose.Schema({
     min: 1,
     max: 5
   },
+
   deliveryExperience: {
     type: Number,
     required: true,
