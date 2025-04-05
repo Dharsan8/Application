@@ -10,7 +10,7 @@ import {
   FaCheck,
   FaTimes,
   FaEye,
-  FaClipboardList, // Add this import
+  FaClipboardList,
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -45,6 +45,7 @@ export default function RestaurantDashboard() {
       }
 
       setRestaurant(parsedRestaurant);
+      setRestaurantStatus(parsedRestaurant.isOpen || false);
     } catch (error) {
       console.error("Error parsing restaurant data:", error);
       navigate("/restaurant-login");
@@ -91,7 +92,7 @@ export default function RestaurantDashboard() {
 
   const handleUpdate = async (foodId, updatedData) => {
     try {
-      const response = await axios.put(
+      await axios.put(
         `http://localhost:3000/api/food/update/${foodId}`,
         updatedData
       );
@@ -119,13 +120,9 @@ export default function RestaurantDashboard() {
       console.error("Error updating food item:", error);
     }
   };
-  useEffect(() => {
-    if (restaurant?.isOpen !== undefined) {
-      setRestaurantStatus(restaurant.isOpen);
-    }
-  }, [restaurant]);
 
-  const handleToggleStatus = async () => {
+  const handleToggleStatus = async (e) => {
+    e.preventDefault();
     const newStatus = !restaurantStatus;
     setRestaurantStatus(newStatus);
 
@@ -134,161 +131,163 @@ export default function RestaurantDashboard() {
         `http://localhost:3000/api/restaurants/${restaurant._id}/resstatus`,
         { isOpen: newStatus }
       );
-      console.log("Status updated successfully");
+      // Update local storage with new status
+      const updatedRestaurant = { ...restaurant, isOpen: newStatus };
+      localStorage.setItem("restaurantData", JSON.stringify(updatedRestaurant));
+      setRestaurant(updatedRestaurant);
     } catch (error) {
       console.error("Failed to update status:", error);
+      // Revert status if update fails
+      setRestaurantStatus(!newStatus);
     }
   };
 
   return (
     <div className="flex min-h-screen">
-<div
-  className={`bg-[#8A4F7D] text-white h-screen p-3 transition-all flex flex-col shadow-lg ${
-    sidebarOpen ? "w-52" : "w-14"
-  }`}
-  style={{ height: "100vh", overflowY: "auto" }}
->
-  {/* Header */}
-  <div className="flex items-center justify-between mb-4">
-    <h2
-      className={`text-sm font-semibold tracking-wide transition-all duration-300 ${
-        sidebarOpen ? "opacity-100" : "opacity-0 w-0 overflow-hidden"
-      }`}
-    >
-      {restaurant?.restaurantName || "Restaurant"}
-    </h2>
-    <FaBars
-      className="text-white text-lg cursor-pointer hover:scale-110 transition"
-      onClick={() => setSidebarOpen(!sidebarOpen)}
-    />
-  </div>
-
-  {/* Navigation - Centered Vertically */}
-  <div className="flex-grow flex items-center justify-center">
-    {sidebarOpen && (
-      <nav className="flex flex-col space-y-3 w-full px-1">
-        <button
-          className={`flex items-center justify-start w-full py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
-            activePage === "viewItems"
-              ? "bg-[#6B3A63]"
-              : "hover:bg-[#6B3A63]/80"
-          }`}
-          onClick={() => setActivePage("viewItems")}
-        >
-          <FaEye className="text-sm mr-3" />
-          <span>View Items</span>
-        </button>
-
-        <button
-          className={`flex items-center justify-start w-full py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
-            activePage === "addItem"
-              ? "bg-[#6B3A63]"
-              : "hover:bg-[#6B3A63]/80"
-          }`}
-          onClick={() => setActivePage("addItem")}
-        >
-          <FaPlus className="text-sm mr-3" />
-          <span>Create Item</span>
-        </button>
-
-        <button
-          className={`flex items-center justify-start w-full py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
-            activePage === "feedback"
-              ? "bg-[#6B3A63]"
-              : "hover:bg-[#6B3A63]/80"
-          }`}
-          onClick={() => setActivePage("feedback")}
-        >
-          <FaCommentDots className="text-sm mr-3" />
-          <span>Feedback</span>
-        </button>
-
-        <button
-          className={`flex items-center justify-start w-full py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
-            activePage === "orders"
-              ? "bg-[#6B3A63]"
-              : "hover:bg-[#6B3A63]/80"
-          }`}
-          onClick={() => setActivePage("orders")}
-        >
-          <FaClipboardList className="text-sm mr-3" />
-          <span>Orders</span>
-        </button>
-      </nav>
-    )}
-  </div>
-</div>
-
-
-      <div className="flex-1 bg-gray-100 relative">
-      <nav className="bg-[#8A4F7D] px-4 py-2 flex justify-between items-center shadow-md relative h-14">
-      {/* Logo / Title */}
-      <h1 className="text-white text-sm font-bold tracking-wider uppercase">
-        Restaurant Dashboard
-      </h1>
-
-      {restaurant && (
-        <div className="flex items-center gap-4 relative">
-          {/* Toggle Open/Close */}
-          <div className="flex items-center gap-2">
-            <span className="text-white text-xs font-medium">
-              {restaurantStatus ? "🟢 Open" : "🔴 Closed"}
-            </span>
-            <div
-              className={`w-10 h-5 flex items-center rounded-full p-1 cursor-pointer transition duration-300 ${
-                restaurantStatus ? "bg-green-400" : "bg-red-400"  
-              }`}
-              onClick={handleToggleStatus}
-            >
-              <div
-                className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ${
-                  restaurantStatus ? "translate-x-5" : "translate-x-0"
-                }`}
-              />
-            </div>
-          </div>
-
-          {/* Profile Icon */}
-          <FaUserCircle
-            className="text-white text-2xl cursor-pointer hover:scale-110 transition-transform duration-200"
-            onClick={() => setIsOpen(!isOpen)}
+      <div
+        className={`bg-[#8A4F7D] text-white h-screen p-3 transition-all flex flex-col shadow-lg ${
+          sidebarOpen ? "w-52" : "w-14"
+        }`}
+        style={{ height: "100vh", overflowY: "auto" }}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <h2
+            className={`text-sm font-semibold tracking-wide transition-all duration-300 ${
+              sidebarOpen ? "opacity-100" : "opacity-0 w-0 overflow-hidden"
+            }`}
+          >
+            {restaurant?.restaurantName || "Restaurant"}
+          </h2>
+          <FaBars
+            className="text-white text-lg cursor-pointer hover:scale-110 transition"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
           />
+        </div>
 
-          {/* Dropdown Panel */}
-          {isOpen && (
-            <div className="absolute right-0 top-12 w-64 bg-white rounded-xl shadow-xl p-4 border border-gray-200 z-50">
-              <h2 className="text-lg font-semibold text-[#8A4F7D] text-center border-b pb-2">
-                {restaurant.restaurantName}
-              </h2>
-              <div className="mt-2 space-y-1 text-gray-700 text-sm">
-                <p className="flex justify-between">
-                  <span className="font-medium">Owner:</span>
-                  {restaurant.ownerName}
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-medium">Location:</span>
-                  {restaurant.location}
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-medium">Email:</span>
-                  {restaurant.email}
-                </p>
-                <p className="flex justify-between">
-                  <span className="font-medium">Phone:</span>
-                  {restaurant.phoneNumber}
-                </p>
-              </div>
+        {/* Navigation - Centered Vertically */}
+        <div className="flex-grow flex items-center justify-center">
+          {sidebarOpen && (
+            <nav className="flex flex-col space-y-3 w-full px-1">
               <button
-                onClick={handleLogout}
-                className="mt-3 w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-1.5 rounded-md transition-all text-sm font-semibold shadow-sm hover:shadow-md"
+                className={`flex items-center justify-start w-full py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                  activePage === "viewItems"
+                    ? "bg-[#6B3A63]"
+                    : "hover:bg-[#6B3A63]/80"
+                }`}
+                onClick={() => setActivePage("viewItems")}
               >
-                Logout
+                <FaEye className="text-sm mr-3" />
+                <span>View Items</span>
               </button>
-            </div>
+
+              <button
+                className={`flex items-center justify-start w-full py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                  activePage === "addItem"
+                    ? "bg-[#6B3A63]"
+                    : "hover:bg-[#6B3A63]/80"
+                }`}
+                onClick={() => setActivePage("addItem")}
+              >
+                <FaPlus className="text-sm mr-3" />
+                <span>Create Item</span>
+              </button>
+
+              <button
+                className={`flex items-center justify-start w-full py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                  activePage === "feedback"
+                    ? "bg-[#6B3A63]"
+                    : "hover:bg-[#6B3A63]/80"
+                }`}
+                onClick={() => setActivePage("feedback")}
+              >
+                <FaCommentDots className="text-sm mr-3" />
+                <span>Feedback</span>
+              </button>
+
+              <button
+                className={`flex items-center justify-start w-full py-2 px-3 rounded-md text-sm font-medium transition-all duration-200 ${
+                  activePage === "orders"
+                    ? "bg-[#6B3A63]"
+                    : "hover:bg-[#6B3A63]/80"
+                }`}
+                onClick={() => setActivePage("orders")}
+              >
+                <FaClipboardList className="text-sm mr-3" />
+                <span>Orders</span>
+              </button>
+            </nav>
           )}
         </div>
-      )}
-    </nav>
+      </div>
+
+      <div className="flex-1 bg-gray-100 relative">
+        <nav className="bg-[#8A4F7D] px-4 py-2 flex justify-between items-center shadow-md relative h-14">
+          <h1 className="text-white text-sm font-bold tracking-wider uppercase">
+            Restaurant Dashboard
+          </h1>
+
+          {restaurant && (
+            <div className="flex items-center gap-4 relative">
+              <div 
+                className="flex items-center gap-2 cursor-pointer"
+                onClick={handleToggleStatus}
+              >
+                <span className="text-white text-xs font-medium">
+                  {restaurantStatus ? "🟢 Open" : "🔴 Closed"}
+                </span>
+                <div
+                  className={`w-10 h-5 flex items-center rounded-full p-1 transition duration-300 ${
+                    restaurantStatus ? "bg-green-400" : "bg-red-400"  
+                  }`}
+                >
+                  <div
+                    className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ${
+                      restaurantStatus ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </div>
+              </div>
+
+              <FaUserCircle
+                className="text-white text-2xl cursor-pointer hover:scale-110 transition-transform duration-200"
+                onClick={() => setIsOpen(!isOpen)}
+              />
+
+              {isOpen && (
+                <div className="absolute right-0 top-12 w-64 bg-white rounded-xl shadow-xl p-4 border border-gray-200 z-50">
+                  <h2 className="text-lg font-semibold text-[#8A4F7D] text-center border-b pb-2">
+                    {restaurant.restaurantName}
+                  </h2>
+                  <div className="mt-2 space-y-1 text-gray-700 text-sm">
+                    <p className="flex justify-between">
+                      <span className="font-medium">Owner:</span>
+                      {restaurant.ownerName}
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="font-medium">Location:</span>
+                      {restaurant.location}
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="font-medium">Email:</span>
+                      {restaurant.email}
+                    </p>
+                    <p className="flex justify-between">
+                      <span className="font-medium">Phone:</span>
+                      {restaurant.phoneNumber}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="mt-3 w-full bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-1.5 rounded-md transition-all text-sm font-semibold shadow-sm hover:shadow-md"
+                  >
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </nav>
 
         <div
           className="p-6"
@@ -355,12 +354,12 @@ const FoodCard = ({ item, onDelete, onUpdate }) => {
         </div>
       )}
 
-<img
-    src={`http://localhost:3000${item.image}`}
-    alt={item.name}
-    className="w-full h-32 object-cover rounded-lg" // Adjusted height
-    style={{aspectRatio: '1 / 1'}} //forces a 1/1 aspect ratio.
-/>
+      <img
+        src={`http://localhost:3000${item.image}`}
+        alt={item.name}
+        className="w-full h-32 object-cover rounded-lg"
+        style={{aspectRatio: '1 / 1'}}
+      />
 
       <h3 className="text-lg font-semibold mt-2 text-gray-800 truncate">
         {item.name}

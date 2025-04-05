@@ -140,4 +140,35 @@ router.get("/api/foodItems", async (req, res) => {
   }
 });
 
+router.get('/', async (req, res) => {
+  try {
+      const foodItems = await FoodItem.find();
+      res.json(foodItems);
+  } catch (err) {
+      res.status(500).json({ message: err.message });
+  }
+});
+
+// // Get food items by restaurant
+// router.get('/:restaurantId', async (req, res) => {
+//   try {
+//       const foodItems = await FoodItem.find({ restaurantId: req.params.restaurantId });
+//       res.json(foodItems);
+//   } catch (err) {
+//       res.status(500).json({ message: err.message });
+//   }
+// });
+
+// routes/food.js
+router.get('/restaurant/:restaurantId', async (req, res) => {
+  try {
+      const foodItems = await FoodItem.find({ 
+          restaurantId: req.params.restaurantId 
+      }).populate('ratings.userId', 'name'); // Populate user info if needed
+      
+      res.json(foodItems);
+  } catch (err) {
+      res.status(500).json({ message: err.message });
+  }
+});
 module.exports = router;
