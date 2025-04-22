@@ -18,8 +18,12 @@ import DeliveryLogin from "./components/Delivery/DeliveryLogin";
 import DeliveryDashboard from "./components/Delivery/DeliveryDashboard";
 import OrderHistory from "./components/User/OrderHistory";
 import FeedbackForm from "./components/User/FeedbackForm";
+import DeliveryAuthPage from "./components/Delivery/DeliveryAuthPage";
+import { Toaster } from 'react-hot-toast';
 function App() {
   return (
+    <>
+    <Toaster position="top-right" reverseOrder={false} />
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
@@ -39,12 +43,12 @@ function App() {
         <Route path ="/user/:username/:restaurantname" element={<FoodItem/>} />
         <Route path="/restaurant-dashboard/orders" element={<Orders />} />
         <Route path="/order-history/:username" element={<OrderHistory />} />
-        <Route path="/delivery-register" element={<DeliveryRegister />} />
-<Route path="/delivery-login" element={<DeliveryLogin />} />
 <Route path="/delivery-dashboard" element={<DeliveryDashboard />} />
 <Route path="/feedback/:orderId" element={<FeedbackForm />} />
+<Route path="/delivery-auth" element={<DeliveryAuthPage/>}/>
       </Routes>
     </Router>
+    </>
   );
 }
 

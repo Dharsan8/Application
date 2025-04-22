@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { FaMotorcycle, FaCheck, FaTimes, FaSignOutAlt, FaUser, FaMapMarkerAlt, FaMap, FaTruck } from "react-icons/fa";
+import toast, { Toaster } from "react-hot-toast";
+import { useLocation } from "react-router-dom";
+import Notification from "../Notification";
 
 const DeliveryDashboard = () => {
   const [deliveryPerson, setDeliveryPerson] = useState(null);
@@ -9,18 +12,22 @@ const DeliveryDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
+  const [showNotification, setShowNotification] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const storedData = localStorage.getItem("deliveryData");
         if (!storedData) {
-          navigate("/delivery-login");
+          navigate("/delivery-auth");
           return;
         }
-  
+
+
         const parsedData = JSON.parse(storedData);
         setDeliveryPerson(parsedData);
+
   
         // Fetch orders for this delivery person
         const response = await axios.get(
@@ -34,6 +41,11 @@ const DeliveryDashboard = () => {
         });
         
         setOrders(filteredOrders);
+        const shouldShow = sessionStorage.getItem("showWelcome");
+        if (shouldShow) {
+          setShowNotification(true);
+          sessionStorage.removeItem("showWelcome");
+        }
       } catch (err) {
         setError("Failed to fetch data");
         console.error(err);
@@ -47,7 +59,7 @@ const DeliveryDashboard = () => {
   
   const handleLogout = () => {
     localStorage.removeItem("deliveryData");
-    navigate("/delivery-login");
+    navigate("/delivery-auth");
   };
 
   const acceptOrder = async (orderId) => {
@@ -109,6 +121,13 @@ const DeliveryDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
+      {showNotification && (
+        <Notification
+          message={`Welcome back, ${deliveryPerson?.name || "Delivery Partner"}!`}
+          type="success"
+          onClose={() => setShowNotification(false)}
+        />
+      )}
       {/* Header */}
       <header className="bg-[#8A4F7D] text-white p-4 shadow-md">
         <div className="container mx-auto flex justify-between items-center">
@@ -135,21 +154,6 @@ const DeliveryDashboard = () => {
 
       {/* Main Content */}
       <main className="container mx-auto p-4">
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Your Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <p><span className="font-medium">Name:</span> {deliveryPerson?.name}</p>
-              <p><span className="font-medium">Email:</span> {deliveryPerson?.email}</p>
-              <p><span className="font-medium">Phone:</span> {deliveryPerson?.phone}</p>
-            </div>
-            <div>
-              <p><span className="font-medium">Location:</span> {deliveryPerson?.location}</p>
-              <p><span className="font-medium">City:</span> {deliveryPerson?.city}</p>
-              <p><span className="font-medium">Status:</span> {deliveryPerson?.status}</p>
-            </div>
-          </div>
-        </div>
 
         <h2 className="text-xl font-semibold mb-4">Available Orders in {deliveryPerson?.city}</h2>
         

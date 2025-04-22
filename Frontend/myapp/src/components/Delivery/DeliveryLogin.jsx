@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-const DeliveryLogin = () => {
+const DeliveryLogin = ({ embedded = false , onToggle}) => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -23,6 +23,8 @@ const DeliveryLogin = () => {
     try {
       const response = await axios.post("http://localhost:3000/api/delivery/login", formData);
       localStorage.setItem("deliveryData", JSON.stringify(response.data.deliveryPerson));
+      sessionStorage.setItem("showWelcome", "true");
+
       navigate("/delivery-dashboard");
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
@@ -32,9 +34,9 @@ const DeliveryLogin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-[#8A4F7D] mb-6 text-center">Delivery Person Login</h2>
+<div className={embedded ? "" : "min-h-screen bg-gray-100 flex items-center justify-center p-4"}>
+<div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <h2 className="text-2xl font-bold text-[#8A4F7D] mb-6 text-center">Hop In & Start Delivering</h2>
         
         {error && <div className="mb-4 text-red-500 text-center">{error}</div>}
         
@@ -46,7 +48,7 @@ const DeliveryLogin = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8A4F7D]"
+  className="w-full px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-[#8A4F7D]"
               required
             />
           </div>
@@ -58,7 +60,7 @@ const DeliveryLogin = () => {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8A4F7D]"
+  className="w-full px-3 py-1.5 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-[#8A4F7D]"
               required
             />
           </div>
@@ -76,7 +78,7 @@ const DeliveryLogin = () => {
           <p className="text-gray-600">
             Don't have an account?{" "}
             <button
-              onClick={() => navigate("/delivery-register")}
+               onClick={onToggle}
               className="text-[#8A4F7D] hover:underline"
             >
               Register here
