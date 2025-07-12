@@ -1,0 +1,15 @@
+services:
+  frontend:
+    image: sanjudddd400/foodie-frontend:latest
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+  backend:
+    image: sanjudddd400/foodie-backend:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
